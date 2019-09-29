@@ -11,7 +11,6 @@ package token
 import (
 	"strconv"
 	"unicode"
-	"unicode/utf8"
 )
 
 // Token is the set of lexical tokens of the Go programming language.
@@ -205,6 +204,7 @@ func (tok Token) String() string {
 	return s
 }
 
+/* Since mfmt is just a formatter, we don't care about precedence...
 // A set of constants for precedence-based expression parsing.
 // Non-operators have lowest precedence, followed by operators
 // starting with precedence 1 up to unary operators. The highest
@@ -237,6 +237,8 @@ func (op Token) Precedence() int {
 	return LowestPrec
 }
 
+*/
+
 var keywords map[string]Token
 
 func init() {
@@ -249,7 +251,7 @@ func init() {
 // Lookup maps an identifier to its keyword token or IDENT (if not a keyword).
 //
 func Lookup(ident string) Token {
-	if tok, is_keyword := keywords[ident]; is_keyword {
+	if tok, isKeyword := keywords[ident]; isKeyword {
 		return tok
 	}
 	return IDENT
@@ -272,14 +274,7 @@ func (tok Token) IsOperator() bool { return operator_beg < tok && tok < operator
 //
 func (tok Token) IsKeyword() bool { return keyword_beg < tok && tok < keyword_end }
 
-// IsExported reports whether name starts with an upper-case letter.
-//
-func IsExported(name string) bool {
-	ch, _ := utf8.DecodeRuneInString(name)
-	return unicode.IsUpper(ch)
-}
-
-// IsKeyword reports whether name is a Go keyword, such as "func" or "return".
+// IsKeyword reports whether name is a Go keyword, such as "function" or "return".
 //
 func IsKeyword(name string) bool {
 	// TODO: opt: use a perfect hash function instead of a global map.
@@ -287,13 +282,13 @@ func IsKeyword(name string) bool {
 	return ok
 }
 
-// IsIdentifier reports whether name is a Go identifier, that is, a non-empty
+// IsIdentifier reports whether name is a MATLAB identifier, that is, a non-empty
 // string made up of letters, digits, and underscores, where the first character
-// is not a digit. Keywords are not identifiers.
+// is not a digit or underscore. Keywords are not identifiers.
 //
 func IsIdentifier(name string) bool {
 	for i, c := range name {
-		if !unicode.IsLetter(c) && c != '_' && (i == 0 || !unicode.IsDigit(c)) {
+		if !unicode.IsLetter(c) && (i == 0 || !unicode.IsDigit(c) && c != '_') {
 			return false
 		}
 	}
