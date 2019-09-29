@@ -27,58 +27,48 @@ const (
 	literal_beg
 	// Identifiers and basic type literals
 	// (these tokens stand for classes of literals)
-	IDENT  // main
-	INT    // 12345
-	FLOAT  // 123.45
-	IMAG   // 123.45i
-	CHAR   // 'a'
-	STRING // "abc"
+	IDENT   // main
+	INT     // 12345
+	FLOAT   // 123.45
+	COMPLEX // 123.45i
+	CHAR    // 'abc'
+	STRING  // "abc"
 	literal_end
 
 	operator_beg
 	// Operators and delimiters
-	ADD // +
-	SUB // -
-	MUL // *
-	QUO // /
-	REM // %
+	// source: https://www.mathworks.com/help/matlab/matlab_prog/matlab-operators-and-special-characters.html
+	ADD         // +
+	SUB         // -
+	ELEM_MUL    // .*
+	MUL         // *
+	ELEM_RDIV   // ./
+	RDIV        // /
+	ELEM_LDIV   // .\
+	LDIV        // \
+	ELEM_PWR    // .^
+	PWR         // ^
+	TRANSP      // .'
+	COMP_TRANSP // '
 
-	AND     // &
-	OR      // |
-	XOR     // ^
-	SHL     // <<
-	SHR     // >>
-	AND_NOT // &^
+	EQL // ==
+	NEQ // ~=
+	GTR // >
+	GEQ // >=
+	LSS // <
+	LEQ // <=
 
-	ADD_ASSIGN // +=
-	SUB_ASSIGN // -=
-	MUL_ASSIGN // *=
-	QUO_ASSIGN // /=
-	REM_ASSIGN // %=
+	AND  // &
+	OR   // |
+	LAND // &&
+	LOR  // ||
+	NOT  // ~
 
-	AND_ASSIGN     // &=
-	OR_ASSIGN      // |=
-	XOR_ASSIGN     // ^=
-	SHL_ASSIGN     // <<=
-	SHR_ASSIGN     // >>=
-	AND_NOT_ASSIGN // &^=
+	AT // @
 
-	LAND  // &&
-	LOR   // ||
-	ARROW // <-
-	INC   // ++
-	DEC   // --
-
-	EQL    // ==
-	LSS    // <
-	GTR    // >
 	ASSIGN // =
-	NOT    // !
+	ARROW  // <-
 
-	NEQ      // !=
-	LEQ      // <=
-	GEQ      // >=
-	DEFINE   // :=
 	ELLIPSIS // ...
 
 	LPAREN // (
@@ -98,33 +88,24 @@ const (
 	// Keywords
 	BREAK
 	CASE
-	CHAN
-	CONST
+	CATCH
+	CLASSDEF
 	CONTINUE
-
-	DEFAULT
-	DEFER
 	ELSE
-	FALLTHROUGH
+	ELSEIF
+	END
 	FOR
-
-	FUNC
-	GO
-	GOTO
+	FUNCTION
+	GLOBAL
 	IF
-	IMPORT
-
-	INTERFACE
-	MAP
-	PACKAGE
-	RANGE
+	OTHERWISE
+	PARFOR
+	PERSISTENT
 	RETURN
-
-	SELECT
-	STRUCT
+	SPMD
 	SWITCH
-	TYPE
-	VAR
+	TRY
+	WHILE
 	keyword_end
 )
 
@@ -134,55 +115,43 @@ var tokens = [...]string{
 	EOF:     "EOF",
 	COMMENT: "COMMENT",
 
-	IDENT:  "IDENT",
-	INT:    "INT",
-	FLOAT:  "FLOAT",
-	IMAG:   "IMAG",
-	CHAR:   "CHAR",
-	STRING: "STRING",
+	IDENT:   "IDENT",
+	INT:     "INT",
+	FLOAT:   "FLOAT",
+	COMPLEX: "COMPLEX",
+	CHAR:    "CHAR",
+	STRING:  "STRING",
 
-	ADD: "+",
-	SUB: "-",
-	MUL: "*",
-	QUO: "/",
-	REM: "%",
+	ADD:         "+",
+	SUB:         "-",
+	ELEM_MUL:    ".*",
+	MUL:         "*",
+	ELEM_RDIV:   "./",
+	RDIV:        "/",
+	ELEM_LDIV:   ".\\",
+	LDIV:        "\\",
+	ELEM_PWR:    ".^",
+	PWR:         "^",
+	TRANSP:      ".'",
+	COMP_TRANSP: "'",
 
-	AND:     "&",
-	OR:      "|",
-	XOR:     "^",
-	SHL:     "<<",
-	SHR:     ">>",
-	AND_NOT: "&^",
+	EQL: "==",
+	NEQ: "~=",
+	GTR: ">",
+	GEQ: ">=",
+	LSS: "<",
+	LEQ: "<=",
 
-	ADD_ASSIGN: "+=",
-	SUB_ASSIGN: "-=",
-	MUL_ASSIGN: "*=",
-	QUO_ASSIGN: "/=",
-	REM_ASSIGN: "%=",
+	AND:  "&",
+	OR:   "|",
+	LAND: "&&",
+	LOR:  "||",
+	NOT:  "~",
 
-	AND_ASSIGN:     "&=",
-	OR_ASSIGN:      "|=",
-	XOR_ASSIGN:     "^=",
-	SHL_ASSIGN:     "<<=",
-	SHR_ASSIGN:     ">>=",
-	AND_NOT_ASSIGN: "&^=",
+	AT: "@",
 
-	LAND:  "&&",
-	LOR:   "||",
-	ARROW: "<-",
-	INC:   "++",
-	DEC:   "--",
-
-	EQL:    "==",
-	LSS:    "<",
-	GTR:    ">",
 	ASSIGN: "=",
-	NOT:    "!",
 
-	NEQ:      "!=",
-	LEQ:      "<=",
-	GEQ:      ">=",
-	DEFINE:   ":=",
 	ELLIPSIS: "...",
 
 	LPAREN: "(",
@@ -197,35 +166,26 @@ var tokens = [...]string{
 	SEMICOLON: ";",
 	COLON:     ":",
 
-	BREAK:    "break",
-	CASE:     "case",
-	CHAN:     "chan",
-	CONST:    "const",
-	CONTINUE: "continue",
-
-	DEFAULT:     "default",
-	DEFER:       "defer",
-	ELSE:        "else",
-	FALLTHROUGH: "fallthrough",
-	FOR:         "for",
-
-	FUNC:   "func",
-	GO:     "go",
-	GOTO:   "goto",
-	IF:     "if",
-	IMPORT: "import",
-
-	INTERFACE: "interface",
-	MAP:       "map",
-	PACKAGE:   "package",
-	RANGE:     "range",
-	RETURN:    "return",
-
-	SELECT: "select",
-	STRUCT: "struct",
-	SWITCH: "switch",
-	TYPE:   "type",
-	VAR:    "var",
+	BREAK:      "break",
+	CASE:       "case",
+	CATCH:      "catch",
+	CLASSDEF:   "classdef",
+	CONTINUE:   "continue",
+	ELSE:       "else",
+	ELSEIF:     "elseif",
+	END:        "end",
+	FOR:        "for",
+	FUNCTION:   "function",
+	GLOBAL:     "global",
+	IF:         "if",
+	OTHERWISE:  "otherwise",
+	PARFOR:     "parfor",
+	PERSISTENT: "persistent",
+	RETURN:     "return",
+	SPMD:       "spmd",
+	SWITCH:     "switch",
+	TRY:        "try",
+	WHILE:      "while",
 }
 
 // String returns the string corresponding to the token tok.
