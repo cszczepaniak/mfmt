@@ -17,9 +17,9 @@ type Type int
 
 // Token represents the set of lexical tokens of the MATLAB programming language.
 type Token struct {
-	tokenType Type
-	lexeme    string
-	line      int
+	TokenType Type
+	Lexeme    string
+	Line      int
 }
 
 // The list of tokens.
@@ -200,7 +200,7 @@ var tokens = [...]string{
 // constant name (e.g. for the token IDENT, the string is "IDENT").
 //
 func (tok Token) String() string {
-	return tok.lexeme
+	return tok.Lexeme
 }
 
 /* Since mfmt is just a formatter, we don't care about precedence...
@@ -261,19 +261,19 @@ func Lookup(ident string) Type {
 // IsLiteral returns true for tokens corresponding to identifiers
 // and basic type literals; it returns false otherwise.
 //
-func (tok Token) IsLiteral() bool { return literal_beg < tok.tokenType && tok.tokenType < literal_end }
+func (tok Token) IsLiteral() bool { return literal_beg < tok.TokenType && tok.TokenType < literal_end }
 
 // IsOperator returns true for tokens corresponding to operators and
 // delimiters; it returns false otherwise.
 //
 func (tok Token) IsOperator() bool {
-	return operator_beg < tok.tokenType && tok.tokenType < operator_end
+	return operator_beg < tok.TokenType && tok.TokenType < operator_end
 }
 
 // IsKeyword returns true for tokens corresponding to keywords;
 // it returns false otherwise.
 //
-func (tok Token) IsKeyword() bool { return keyword_beg < tok.tokenType && tok.tokenType < keyword_end }
+func (tok Token) IsKeyword() bool { return keyword_beg < tok.TokenType && tok.TokenType < keyword_end }
 
 // IsKeyword reports whether name is a Go keyword, such as "function" or "return".
 //

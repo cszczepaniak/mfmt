@@ -45,12 +45,12 @@ func TestToken_IsLiteral(t *testing.T) {
 	}{
 		{
 			name: "test literal",
-			tok:  Token{tokenType: CHAR, lexeme: "abcd", line: 0},
+			tok:  Token{TokenType: CHAR, Lexeme: "abcd", Line: 0},
 			want: true,
 		},
 		{
 			name: "test non-literal",
-			tok:  Token{tokenType: ADD, lexeme: "+", line: 0},
+			tok:  Token{TokenType: ADD, Lexeme: "+", Line: 0},
 			want: false,
 		},
 	}
@@ -68,12 +68,12 @@ func TestToken_IsOperator(t *testing.T) {
 	}{
 		{
 			name: "test operator",
-			tok:  Token{tokenType: LDIV, lexeme: "\\", line: 0},
+			tok:  Token{TokenType: LDIV, Lexeme: "\\", Line: 0},
 			want: true,
 		},
 		{
 			name: "test non-operator",
-			tok:  Token{tokenType: EOF, lexeme: "", line: 0},
+			tok:  Token{TokenType: EOF, Lexeme: "", Line: 0},
 			want: false,
 		},
 	}
@@ -91,12 +91,12 @@ func TestToken_IsKeyword(t *testing.T) {
 	}{
 		{
 			name: "test keyword",
-			tok:  Token{tokenType: IF, lexeme: "if", line: 0},
+			tok:  Token{TokenType: IF, Lexeme: "if", Line: 0},
 			want: true,
 		},
 		{
 			name: "test non-keyword",
-			tok:  Token{tokenType: ADD, lexeme: "+", line: 0},
+			tok:  Token{TokenType: ADD, Lexeme: "+", Line: 0},
 			want: false,
 		},
 	}
