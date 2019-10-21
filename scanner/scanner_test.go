@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/cszczepaniak/mfmt/token"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -93,5 +94,45 @@ func Test_isAlpha(t *testing.T) {
 	for _, tt := range tests {
 		got := isAlpha(tt.in)
 		assert.Equal(t, tt.expect, got)
+	}
+}
+
+func TestScanner_scanToken(t *testing.T) {
+	tests := []struct {
+		name   string
+		source string
+		expect token.Token
+	}{
+		{
+			name:   "test +",
+			source: "+",
+			expect: token.Token{TokenType: token.ADD, Lexeme: "+", Line: 1},
+		},
+		{
+			name:   "test -",
+			source: "-",
+			expect: token.Token{TokenType: token.SUB, Lexeme: "-", Line: 1},
+		},
+		{
+			name:   "test *",
+			source: "*",
+			expect: token.Token{TokenType: token.MUL, Lexeme: "*", Line: 1},
+		},
+		{
+			name:   "test <",
+			source: "<",
+			expect: token.Token{TokenType: token.LSS, Lexeme: "<", Line: 1},
+		},
+		{
+			name:   "test <=",
+			source: "<=",
+			expect: token.Token{TokenType: token.LEQ, Lexeme: "<=", Line: 1},
+		},
+	}
+	for _, tt := range tests {
+		s := NewScanner(tt.source)
+		s.scanToken()
+		tok := s.tokens[0]
+		assert.Equal(t, tt.expect, tok)
 	}
 }
