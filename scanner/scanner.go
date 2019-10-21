@@ -19,6 +19,11 @@ func NewScanner(source string) *Scanner {
 	return &scanner
 }
 
+// isAtEnd checks if current is pointing at the end of the file
+func (s *Scanner) isAtEnd() bool {
+	return s.current == len(s.source)
+}
+
 // peek looks at the current character without consuming it
 func (s *Scanner) peek() rune {
 	return s.source[s.current]
@@ -26,9 +31,8 @@ func (s *Scanner) peek() rune {
 
 // advance consumes and returns the current character
 func (s *Scanner) advance() rune {
-	ch := s.source[s.current]
-	if s.current < len(s.source)-1 {
+	if !s.isAtEnd() {
 		s.current++
 	}
-	return ch
+	return s.source[s.current-1]
 }
