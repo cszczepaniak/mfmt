@@ -1,6 +1,7 @@
 package scanner
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -19,9 +20,8 @@ func TestScanner_advance(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		for _, c := range tt.source {
-			assert.Equal(t, c, tt.s.ch)
-			tt.s.advance()
+		for i, c := range tt.source {
+			assert.Equal(t, c, tt.s.advance(), fmt.Sprintf("failed at index %d", i))
 		}
 	}
 }

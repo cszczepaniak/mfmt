@@ -3,7 +3,6 @@ package scanner
 // Scanner stores state
 type Scanner struct {
 	source  []rune
-	ch      rune
 	start   int
 	current int
 }
@@ -17,20 +16,14 @@ func NewScanner(source string) *Scanner {
 	var scanner Scanner
 	scanner.source = []rune(source)
 	scanner.start = 0
-	scanner.ch = scanner.source[0]
 	return &scanner
 }
 
-// advance advances the file position
-func (s *Scanner) advance() {
+// advance consumes the current character
+func (s *Scanner) advance() rune {
+	ch := s.source[s.current]
 	if s.current < len(s.source)-1 {
 		s.current++
-		s.ch = s.source[s.current]
 	}
-}
-
-func (s *Scanner) skipWhitespace() {
-	for s.ch == ' ' || s.ch == '\n' || s.ch == '\t' || s.ch == '\r' {
-		s.advance()
-	}
+	return ch
 }
