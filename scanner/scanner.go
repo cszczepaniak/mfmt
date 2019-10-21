@@ -18,7 +18,8 @@ type Scanner struct {
 func NewScanner(source string) *Scanner {
 	var scanner Scanner
 	scanner.source = []rune(source)
-	scanner.start = 0
+	scanner.start, scanner.current = 0, 0
+	scanner.tokens = make([]token.Token, 0)
 	return &scanner
 }
 
