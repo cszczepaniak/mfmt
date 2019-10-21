@@ -86,24 +86,37 @@ func (s *Scanner) scanToken() {
 		} else {
 			s.tokens = append(s.tokens, s.makeToken(token.GTR))
 		}
-	// The dot is interesting because of ellipses and number literals with no leading zero
 	case '.':
+		// The dot is interesting because of ellipses and number literals with no leading zero
 		if isDigit(s.peek()) {
 			s.scanNumber()
 		} else {
 			s.scanDot()
 		}
-	// Check for literals in default case
+	case '\r', '\f', '\t', '\v':
+		// Skip whitespace
+	case '\n':
+		// Handle new lines
+		s.line++
 	default:
+		// Check for literals in default case
 		switch {
 		case isAlpha(c):
-			s.scanIdent()
+			s.scanWord()
 		case isDigit(c):
 			s.scanNumber()
 		default:
 			s.tokens = append(s.tokens, s.makeToken(token.ILLEGAL))
 		}
 	}
+}
+
+func (s *Scanner) scanWord() {
+
+}
+
+func (s *Scanner) scanNumber() {
+
 }
 
 func (s *Scanner) scanDot() {
@@ -144,6 +157,9 @@ func (s *Scanner) isAtEnd() bool {
 
 // peek looks at the current character without consuming it
 func (s *Scanner) peek() rune {
+	if s.isAtEnd() {
+		return 0
+	}
 	return s.source[s.current]
 }
 

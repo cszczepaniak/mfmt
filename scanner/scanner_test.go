@@ -143,10 +143,17 @@ func TestScanner_scanToken(t *testing.T) {
 			source: "..",
 			expect: token.Token{TokenType: token.ILLEGAL, Lexeme: "..", Line: 1},
 		},
+		{
+			name:   "test whitespace",
+			source: "\t\r\v+",
+			expect: token.Token{TokenType: token.ADD, Lexeme: "+", Line: 1},
+		},
 	}
 	for _, tt := range tests {
 		s := NewScanner(tt.source)
-		s.scanToken()
+		for range tt.source {
+			s.scanToken()
+		}
 		tok := s.tokens[0]
 		assert.Equal(t, tt.expect, tok)
 	}
