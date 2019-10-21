@@ -9,17 +9,23 @@
 package token
 
 import (
-	"strconv"
 	"unicode"
 )
 
-// Token is the set of lexical tokens of the MATLAB programming language.
-type Token int
+// Type is an enum for the set of tokens
+type Type int
+
+// Token represents the set of lexical tokens of the MATLAB programming language.
+type Token struct {
+	tokenType Type
+	lexeme    string
+	line      int
+}
 
 // The list of tokens.
 const (
 	// Special tokens
-	ILLEGAL Token = iota
+	ILLEGAL Type = iota
 	EOF
 	COMMENT
 
@@ -194,14 +200,7 @@ var tokens = [...]string{
 // constant name (e.g. for the token IDENT, the string is "IDENT").
 //
 func (tok Token) String() string {
-	s := ""
-	if 0 <= tok && tok < Token(len(tokens)) {
-		s = tokens[tok]
-	}
-	if s == "" {
-		s = "token(" + strconv.Itoa(int(tok)) + ")"
-	}
-	return s
+	return tok.lexeme
 }
 
 /* Since mfmt is just a formatter, we don't care about precedence...
@@ -239,10 +238,10 @@ func (op Token) Precedence() int {
 
 */
 
-var keywords map[string]Token
+var keywords map[string]Type
 
 func init() {
-	keywords = make(map[string]Token)
+	keywords = make(map[string]Type)
 	for i := keyword_beg + 1; i < keyword_end; i++ {
 		keywords[tokens[i]] = i
 	}
@@ -250,9 +249,9 @@ func init() {
 
 // Lookup maps an identifier to its keyword token or IDENT (if not a keyword).
 //
-func Lookup(ident string) Token {
-	if tok, isKeyword := keywords[ident]; isKeyword {
-		return tok
+func Lookup(ident string) Type {
+	if tokType, isKeyword := keywords[ident]; isKeyword {
+		return tokType
 	}
 	return IDENT
 }
@@ -262,17 +261,19 @@ func Lookup(ident string) Token {
 // IsLiteral returns true for tokens corresponding to identifiers
 // and basic type literals; it returns false otherwise.
 //
-func (tok Token) IsLiteral() bool { return literal_beg < tok && tok < literal_end }
+func (tok Token) IsLiteral() bool { return literal_beg < tok.tokenType && tok.tokenType < literal_end }
 
 // IsOperator returns true for tokens corresponding to operators and
 // delimiters; it returns false otherwise.
 //
-func (tok Token) IsOperator() bool { return operator_beg < tok && tok < operator_end }
+func (tok Token) IsOperator() bool {
+	return operator_beg < tok.tokenType && tok.tokenType < operator_end
+}
 
 // IsKeyword returns true for tokens corresponding to keywords;
 // it returns false otherwise.
 //
-func (tok Token) IsKeyword() bool { return keyword_beg < tok && tok < keyword_end }
+func (tok Token) IsKeyword() bool { return keyword_beg < tok.tokenType && tok.tokenType < keyword_end }
 
 // IsKeyword reports whether name is a Go keyword, such as "function" or "return".
 //

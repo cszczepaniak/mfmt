@@ -14,34 +14,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestToken_String(t *testing.T) {
-	tests := []struct {
-		name string
-		tok  Token
-		want string
-	}{
-		{
-			name: "operator",
-			tok:  ADD,
-			want: "+",
-		},
-		{
-			name: "keyword",
-			tok:  FUNCTION,
-			want: "function",
-		},
-	}
-	for _, tt := range tests {
-		got := tt.tok.String()
-		assert.Equal(t, tt.want, got, tt.name)
-	}
-}
-
 func TestLookup(t *testing.T) {
 	tests := []struct {
 		name  string
 		ident string
-		want  Token
+		want  Type
 	}{
 		{
 			name:  "test keyword",
@@ -68,12 +45,12 @@ func TestToken_IsLiteral(t *testing.T) {
 	}{
 		{
 			name: "test literal",
-			tok:  CHAR,
+			tok:  Token{tokenType: CHAR, lexeme: "abcd", line: 0},
 			want: true,
 		},
 		{
 			name: "test non-literal",
-			tok:  ADD,
+			tok:  Token{tokenType: ADD, lexeme: "+", line: 0},
 			want: false,
 		},
 	}
@@ -91,12 +68,12 @@ func TestToken_IsOperator(t *testing.T) {
 	}{
 		{
 			name: "test operator",
-			tok:  LDIV,
+			tok:  Token{tokenType: LDIV, lexeme: "\\", line: 0},
 			want: true,
 		},
 		{
 			name: "test non-operator",
-			tok:  EOF,
+			tok:  Token{tokenType: EOF, lexeme: "", line: 0},
 			want: false,
 		},
 	}
@@ -114,12 +91,12 @@ func TestToken_IsKeyword(t *testing.T) {
 	}{
 		{
 			name: "test keyword",
-			tok:  IF,
+			tok:  Token{tokenType: IF, lexeme: "if", line: 0},
 			want: true,
 		},
 		{
 			name: "test non-keyword",
-			tok:  ADD,
+			tok:  Token{tokenType: ADD, lexeme: "+", line: 0},
 			want: false,
 		},
 	}

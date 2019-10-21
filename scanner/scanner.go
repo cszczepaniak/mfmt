@@ -5,6 +5,7 @@ type Scanner struct {
 	source  []rune
 	start   int
 	current int
+	tokens  []Token
 }
 
 // Scanner needs to keep track of its current position in the file,
