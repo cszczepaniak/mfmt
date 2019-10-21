@@ -1,11 +1,13 @@
 package scanner
 
+import "github.com/cszczepaniak/mfmt/token"
+
 // Scanner stores state
 type Scanner struct {
 	source  []rune
 	start   int
 	current int
-	tokens  []Token
+	tokens  []token.Token
 }
 
 // Scanner needs to keep track of its current position in the file,
@@ -18,6 +20,14 @@ func NewScanner(source string) *Scanner {
 	scanner.source = []rune(source)
 	scanner.start = 0
 	return &scanner
+}
+
+func isAlpha(c rune) bool {
+	return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')
+}
+
+func isDigit(c rune) bool {
+	return c >= '0' && c <= '9'
 }
 
 // isAtEnd checks if current is pointing at the end of the file
