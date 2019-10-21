@@ -128,6 +128,21 @@ func TestScanner_scanToken(t *testing.T) {
 			source: "<=",
 			expect: token.Token{TokenType: token.LEQ, Lexeme: "<=", Line: 1},
 		},
+		{
+			name:   "test .*",
+			source: ".*",
+			expect: token.Token{TokenType: token.ELEM_MUL, Lexeme: ".*", Line: 1},
+		},
+		{
+			name:   "test ...",
+			source: "...",
+			expect: token.Token{TokenType: token.ELLIPSIS, Lexeme: "...", Line: 1},
+		},
+		{
+			name:   "test ..",
+			source: "..",
+			expect: token.Token{TokenType: token.ILLEGAL, Lexeme: "..", Line: 1},
+		},
 	}
 	for _, tt := range tests {
 		s := NewScanner(tt.source)

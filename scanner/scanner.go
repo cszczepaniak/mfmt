@@ -42,6 +42,8 @@ func (s *Scanner) scanToken() {
 		s.tokens = append(s.tokens, s.makeToken(token.SUB))
 	case '*':
 		s.tokens = append(s.tokens, s.makeToken(token.MUL))
+	case '\\':
+		s.tokens = append(s.tokens, s.makeToken(token.LDIV))
 	case '(':
 		s.tokens = append(s.tokens, s.makeToken(token.LPAREN))
 	case ')':
@@ -81,6 +83,30 @@ func (s *Scanner) scanToken() {
 			s.tokens = append(s.tokens, s.makeToken(token.GEQ))
 		} else {
 			s.tokens = append(s.tokens, s.makeToken(token.GTR))
+		}
+	case '.':
+		s.scanDot()
+	}
+}
+
+func (s *Scanner) scanDot() {
+	switch {
+	case s.match('*'):
+		s.tokens = append(s.tokens, s.makeToken(token.ELEM_MUL))
+	case s.match('/'):
+		s.tokens = append(s.tokens, s.makeToken(token.ELEM_RDIV))
+	case s.match('\\'):
+		s.tokens = append(s.tokens, s.makeToken(token.ELEM_LDIV))
+	case s.match('^'):
+		s.tokens = append(s.tokens, s.makeToken(token.ELEM_PWR))
+	case s.match('\''):
+		s.tokens = append(s.tokens, s.makeToken(token.TRANSP))
+	default:
+		// Check for ellipsis
+		if s.match('.') && s.match('.') {
+			s.tokens = append(s.tokens, s.makeToken(token.ELLIPSIS))
+		} else {
+			s.tokens = append(s.tokens, s.makeToken(token.ILLEGAL))
 		}
 	}
 }
