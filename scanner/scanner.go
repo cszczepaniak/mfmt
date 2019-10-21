@@ -19,7 +19,7 @@ func NewScanner(source string) *Scanner {
 	return &scanner
 }
 
-// advance consumes the current character
+// advance consumes and returns the current character
 func (s *Scanner) advance() rune {
 	ch := s.source[s.current]
 	if s.current < len(s.source)-1 {
