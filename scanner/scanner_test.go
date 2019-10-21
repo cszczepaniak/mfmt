@@ -25,3 +25,22 @@ func TestScanner_advance(t *testing.T) {
 		}
 	}
 }
+
+func TestScanner_peek(t *testing.T) {
+	tests := []struct {
+		name   string
+		source string
+		s      *Scanner
+	}{
+		{
+			name:   "test peek",
+			source: "abcdefghi",
+			s:      NewScanner("abcdefghi"),
+		},
+	}
+	for _, tt := range tests {
+		for i := range tt.source {
+			assert.Equal(t, 'a', tt.s.peek(), fmt.Sprintf("failed at index %d", i))
+		}
+	}
+}

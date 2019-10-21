@@ -19,6 +19,11 @@ func NewScanner(source string) *Scanner {
 	return &scanner
 }
 
+// peek looks at the current character without consuming it
+func (s *Scanner) peek() rune {
+	return s.source[s.current]
+}
+
 // advance consumes and returns the current character
 func (s *Scanner) advance() rune {
 	ch := s.source[s.current]
