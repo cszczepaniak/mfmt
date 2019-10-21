@@ -34,7 +34,8 @@ func isDigit(c rune) bool {
 
 func (s *Scanner) scanToken() {
 	s.start = s.current
-	switch s.advance() {
+	c := s.advance()
+	switch c {
 	// One-character tokens are up first
 	case '+':
 		s.tokens = append(s.tokens, s.makeToken(token.ADD))
@@ -60,6 +61,7 @@ func (s *Scanner) scanToken() {
 		s.tokens = append(s.tokens, s.makeToken(token.COLON))
 	case ',':
 		s.tokens = append(s.tokens, s.makeToken(token.COMMA))
+	// Next handle two-character operators
 	case '~':
 		if s.match('=') {
 			s.tokens = append(s.tokens, s.makeToken(token.NEQ))
@@ -84,8 +86,23 @@ func (s *Scanner) scanToken() {
 		} else {
 			s.tokens = append(s.tokens, s.makeToken(token.GTR))
 		}
+	// The dot is interesting because of ellipses and number literals with no leading zero
 	case '.':
-		s.scanDot()
+		if isDigit(s.peek()) {
+			s.scanNumber()
+		} else {
+			s.scanDot()
+		}
+	// Check for literals in default case
+	default:
+		switch {
+		case isAlpha(c):
+			s.scanIdent()
+		case isDigit(c):
+			s.scanNumber()
+		default:
+			s.tokens = append(s.tokens, s.makeToken(token.ILLEGAL))
+		}
 	}
 }
 
