@@ -21,8 +21,8 @@ func NewScanner(source string) *Scanner {
 	return &scanner
 }
 
-// next advances the file position
-func (s *Scanner) next() {
+// advance advances the file position
+func (s *Scanner) advance() {
 	if s.current < len(s.source)-1 {
 		s.current++
 		s.ch = s.source[s.current]
@@ -31,6 +31,6 @@ func (s *Scanner) next() {
 
 func (s *Scanner) skipWhitespace() {
 	for s.ch == ' ' || s.ch == '\n' || s.ch == '\t' || s.ch == '\r' {
-		s.next()
+		s.advance()
 	}
 }

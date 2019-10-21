@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestScanner_next(t *testing.T) {
+func TestScanner_advance(t *testing.T) {
 	tests := []struct {
 		name   string
 		source string
@@ -21,7 +21,7 @@ func TestScanner_next(t *testing.T) {
 	for _, tt := range tests {
 		for _, c := range tt.source {
 			assert.Equal(t, c, tt.s.ch)
-			tt.s.next()
+			tt.s.advance()
 		}
 	}
 }
