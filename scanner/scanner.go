@@ -40,8 +40,8 @@ func isDigit(c rune) bool {
 
 func (s *Scanner) scanToken() {
 	s.start = s.current
-	c := s.advance()
-	switch c {
+	s.advance()
+	switch s.c {
 	// One-character tokens are up first
 	case '+':
 		s.tokens = append(s.tokens, s.makeToken(token.ADD))
@@ -108,9 +108,9 @@ func (s *Scanner) scanToken() {
 	default:
 		// Check for literals in default case
 		switch {
-		case isAlpha(c):
+		case isAlpha(s.c):
 			s.scanWord()
-		case isDigit(c):
+		case isDigit(s.c):
 			s.scanNumber()
 		default:
 			s.tokens = append(s.tokens, s.makeToken(token.ILLEGAL))
