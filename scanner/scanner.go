@@ -89,6 +89,7 @@ func (s *Scanner) scanToken() {
 	case '.':
 		// The dot is interesting because of ellipses and number literals with no leading zero
 		if isDigit(s.peek()) {
+			s.retreat()
 			s.scanNumber()
 		} else {
 			s.scanDot()
@@ -124,58 +125,38 @@ func (s *Scanner) scanWord() {
 // TODO this might just be the ugliest function I've ever written..... but it passes the tests.
 // clean it up later............
 func (s *Scanner) scanNumber() {
-	//isFloat, isScientific := false, false
+	isFloat, isComplex := false, false
 	// Integer part
-	for !s.isAtEnd() && isDigit(s.peek()) {
+	s.consumeDigits()
+	// Check for fractional part
+	if s.peek() == '.' && isDigit(s.peekNext()) {
+		isFloat = true
+		s.advance()
+		s.consumeDigits()
+	}
+	// Check for scientific notation
+	if (s.peek() == 'e' || s.peek() == 'E') && isDigit(s.peekNext()) {
+		isFloat = true
+		s.advance()
+		s.consumeDigits()
+	}
+	// Check for complex
+	if s.peek() == 'i' || s.peek() == 'j' {
+		isComplex = true
 		s.advance()
 	}
-	// Check for fractional part, scientific notation, imaginary numbers
-	switch s.peek() {
-	case '.':
-		if isDigit(s.peekNext()) {
-			// Consume the dot
-			s.advance()
-			// Consume the next digits
-			for !s.isAtEnd() && isDigit(s.peek()) {
-				s.advance()
-			}
-			// Check for any scientific notation
-			if s.peek() == 'e' || s.peek() == 'E' {
-				if isDigit(s.peekNext()) {
-					s.advance()
-					for !s.isAtEnd() && isDigit(s.peek()) {
-						s.advance()
-					}
-					s.tokens = append(s.tokens, s.makeToken(token.FLOAT))
-				} else {
-					s.advance()
-					s.tokens = append(s.tokens, s.makeToken(token.ILLEGAL))
-				}
-			} else {
-				s.tokens = append(s.tokens, s.makeToken(token.FLOAT))
-			}
-		} else {
-			// a trailing . is illegal
-			s.advance()
-			s.tokens = append(s.tokens, s.makeToken(token.ILLEGAL))
-		}
-	case 'e', 'E':
-		if isDigit(s.peekNext()) {
-			s.advance()
-			for !s.isAtEnd() && isDigit(s.peek()) {
-				s.advance()
-			}
-			s.tokens = append(s.tokens, s.makeToken(token.FLOAT))
-		} else {
-			// a trailing e or E is illegal
-			s.advance()
-			s.tokens = append(s.tokens, s.makeToken(token.ILLEGAL))
-		}
-	case 'i', 'j':
-		s.advance()
+	if isComplex {
 		s.tokens = append(s.tokens, s.makeToken(token.COMPLEX))
-	default:
+	} else if isFloat {
+		s.tokens = append(s.tokens, s.makeToken(token.FLOAT))
+	} else {
 		s.tokens = append(s.tokens, s.makeToken(token.INT))
+	}
+}
+
+func (s *Scanner) consumeDigits() {
+	for !s.isAtEnd() && isDigit(s.peek()) {
+		s.advance()
 	}
 }
 
@@ -236,6 +217,12 @@ func (s *Scanner) advance() rune {
 		s.current++
 	}
 	return s.source[s.current-1]
+}
+
+func (s *Scanner) retreat() {
+	if s.current > 0 {
+		s.current--
+	}
 }
 
 // match is like advance, but the current character must match a condition first
