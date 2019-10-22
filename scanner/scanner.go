@@ -122,8 +122,6 @@ func (s *Scanner) scanWord() {
 	s.tokens = append(s.tokens, s.makeToken(tokType))
 }
 
-// TODO this might just be the ugliest function I've ever written..... but it passes the tests.
-// clean it up later............
 func (s *Scanner) scanNumber() {
 	isFloat, isComplex := false, false
 	// Integer part
