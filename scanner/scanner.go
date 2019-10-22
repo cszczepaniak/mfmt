@@ -112,11 +112,70 @@ func (s *Scanner) scanToken() {
 }
 
 func (s *Scanner) scanWord() {
-
+	c := s.peek()
+	for !s.isAtEnd() && (isAlpha(c) || isDigit(c) || c == '_') {
+		s.advance()
+	}
+	word := string(s.source[s.start:s.current])
+	tokType := token.Lookup(word)
+	s.tokens = append(s.tokens, s.makeToken(tokType))
 }
 
+// TODO this might just be the ugliest function I've ever written..... but it passes the tests.
+// clean it up later............
 func (s *Scanner) scanNumber() {
-
+	// Integer part
+	for !s.isAtEnd() && isDigit(s.peek()) {
+		s.advance()
+	}
+	// Check for fractional part, scientific notation, imaginary numbers
+	switch s.peek() {
+	case '.':
+		if isDigit(s.peekNext()) {
+			// Consume the dot
+			s.advance()
+			// Consume the next digits
+			for !s.isAtEnd() && isDigit(s.peek()) {
+				s.advance()
+			}
+			// Check for any scientific notation
+			if s.peek() == 'e' || s.peek() == 'E' {
+				if isDigit(s.peekNext()) {
+					s.advance()
+					for !s.isAtEnd() && isDigit(s.peek()) {
+						s.advance()
+					}
+					s.tokens = append(s.tokens, s.makeToken(token.FLOAT))
+				} else {
+					s.advance()
+					s.tokens = append(s.tokens, s.makeToken(token.ILLEGAL))
+				}
+			} else {
+				s.tokens = append(s.tokens, s.makeToken(token.FLOAT))
+			}
+		} else {
+			// a trailing . is illegal
+			s.advance()
+			s.tokens = append(s.tokens, s.makeToken(token.ILLEGAL))
+		}
+	case 'e', 'E':
+		if isDigit(s.peekNext()) {
+			s.advance()
+			for !s.isAtEnd() && isDigit(s.peek()) {
+				s.advance()
+			}
+			s.tokens = append(s.tokens, s.makeToken(token.FLOAT))
+		} else {
+			// a trailing e or E is illegal
+			s.advance()
+			s.tokens = append(s.tokens, s.makeToken(token.ILLEGAL))
+		}
+	case 'i', 'j':
+		s.advance()
+		s.tokens = append(s.tokens, s.makeToken(token.COMPLEX))
+	default:
+		s.tokens = append(s.tokens, s.makeToken(token.INT))
+	}
 }
 
 func (s *Scanner) scanDot() {
@@ -161,6 +220,13 @@ func (s *Scanner) peek() rune {
 		return 0
 	}
 	return s.source[s.current]
+}
+
+func (s *Scanner) peekNext() rune {
+	if s.current+1 >= len(s.source) {
+		return 0
+	}
+	return s.source[s.current+1]
 }
 
 // advance consumes and returns the current character

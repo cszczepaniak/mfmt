@@ -148,13 +148,80 @@ func TestScanner_scanToken(t *testing.T) {
 			source: "\t\r\v+",
 			expect: token.Token{TokenType: token.ADD, Lexeme: "+", Line: 1},
 		},
+		{
+			name:   "test identifier",
+			source: "myVar",
+			expect: token.Token{TokenType: token.IDENT, Lexeme: "myVar", Line: 1},
+		},
+		{
+			name:   "test keyword",
+			source: "function",
+			expect: token.Token{TokenType: token.FUNCTION, Lexeme: "function", Line: 1},
+		},
+		{
+			// This will scan to be an INT and an IDENT, but the parser will flag it later
+			name:   "test illegal identifier",
+			source: "3real5me",
+			expect: token.Token{TokenType: token.INT, Lexeme: "3", Line: 1},
+		},
+		{
+			// This will scan to be an ILLEGAL and then an IDENT
+			name:   "test illegal identifier",
+			source: "_myVar",
+			expect: token.Token{TokenType: token.ILLEGAL, Lexeme: "_", Line: 1},
+		},
+		{
+			name:   "test illegal number",
+			source: "12.",
+			expect: token.Token{TokenType: token.ILLEGAL, Lexeme: "12.", Line: 1},
+		},
+		{
+			name:   "test illegal number",
+			source: "12e",
+			expect: token.Token{TokenType: token.ILLEGAL, Lexeme: "12e", Line: 1},
+		},
+		{
+			name:   "test float",
+			source: "12.1234",
+			expect: token.Token{TokenType: token.FLOAT, Lexeme: "12.1234", Line: 1},
+		},
+		{
+			name:   "test illegal float",
+			source: "12.1234e",
+			expect: token.Token{TokenType: token.ILLEGAL, Lexeme: "12.1234e", Line: 1},
+		},
+		{
+			name:   "test int",
+			source: "1234",
+			expect: token.Token{TokenType: token.INT, Lexeme: "1234", Line: 1},
+		},
+		{
+			name:   "test scientific",
+			source: "1.3e4",
+			expect: token.Token{TokenType: token.FLOAT, Lexeme: "1.3e4", Line: 1},
+		},
+		{
+			name:   "test scientific",
+			source: "1e4",
+			expect: token.Token{TokenType: token.FLOAT, Lexeme: "1e4", Line: 1},
+		},
+		{
+			name:   "test complex",
+			source: "12i",
+			expect: token.Token{TokenType: token.COMPLEX, Lexeme: "12i", Line: 1},
+		},
+		{
+			name:   "test scientific complex",
+			source: "1.3e4j",
+			expect: token.Token{TokenType: token.COMPLEX, Lexeme: "1.3e4j", Line: 1},
+		},
 	}
 	for _, tt := range tests {
 		s := NewScanner(tt.source)
-		for range tt.source {
+		for !s.isAtEnd() {
 			s.scanToken()
 		}
 		tok := s.tokens[0]
-		assert.Equal(t, tt.expect, tok)
+		assert.Equal(t, tt.expect, tok, tt.name)
 	}
 }
