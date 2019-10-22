@@ -1,101 +1,11 @@
 package scanner
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/cszczepaniak/mfmt/token"
 	"github.com/stretchr/testify/assert"
 )
-
-func TestScanner_advance(t *testing.T) {
-	tests := []struct {
-		name   string
-		source string
-		s      *Scanner
-	}{
-		{
-			name:   "test next",
-			source: "abcdefghi",
-			s:      NewScanner("abcdefghi"),
-		},
-	}
-	for _, tt := range tests {
-		for i, c := range tt.source {
-			assert.Equal(t, c, tt.s.advance(), fmt.Sprintf("failed at index %d", i))
-		}
-	}
-}
-
-func TestScanner_peek(t *testing.T) {
-	tests := []struct {
-		name   string
-		source string
-		s      *Scanner
-	}{
-		{
-			name:   "test peek",
-			source: "abcdefghi",
-			s:      NewScanner("abcdefghi"),
-		},
-	}
-	for _, tt := range tests {
-		for i := range tt.source {
-			assert.Equal(t, 'a', tt.s.peek(), fmt.Sprintf("failed at index %d", i))
-		}
-	}
-}
-
-func Test_isDigit(t *testing.T) {
-	tests := []struct {
-		name   string
-		in     rune
-		expect bool
-	}{
-		{
-			name:   "test digit",
-			in:     '5',
-			expect: true,
-		},
-		{
-			name:   "test nondigit",
-			in:     'a',
-			expect: false,
-		},
-	}
-	for _, tt := range tests {
-		got := isDigit(tt.in)
-		assert.Equal(t, tt.expect, got)
-	}
-}
-
-func Test_isAlpha(t *testing.T) {
-	tests := []struct {
-		name   string
-		in     rune
-		expect bool
-	}{
-		{
-			name:   "test alpha",
-			in:     'a',
-			expect: true,
-		},
-		{
-			name:   "test alpha",
-			in:     'Z',
-			expect: true,
-		},
-		{
-			name:   "test nonalpha",
-			in:     '_',
-			expect: false,
-		},
-	}
-	for _, tt := range tests {
-		got := isAlpha(tt.in)
-		assert.Equal(t, tt.expect, got)
-	}
-}
 
 func TestScanner_scanToken(t *testing.T) {
 	tests := []struct {
@@ -236,3 +146,59 @@ func TestScanner_scanToken(t *testing.T) {
 	expect: token.Token{TokenType: token.INT, Lexeme: "12", Line: 1},
 },
 */
+
+func TestScanner_scanNumber(t *testing.T) {
+	tests := []struct {
+		name       string
+		source     string
+		expTokType token.Type
+	}{
+		{
+			name:       "test int",
+			source:     "1234",
+			expTokType: token.INT,
+		},
+		{
+			name:       "test float",
+			source:     "12.34",
+			expTokType: token.FLOAT,
+		},
+		{
+			name:       "test exp",
+			source:     "1e4",
+			expTokType: token.FLOAT,
+		},
+		{
+			name:       "test decimal exp",
+			source:     "1.1e4",
+			expTokType: token.FLOAT,
+		},
+		{
+			name:       "test neg exp",
+			source:     "1.1e-4",
+			expTokType: token.FLOAT,
+		},
+		{
+			name:       "test complex",
+			source:     "5j",
+			expTokType: token.COMPLEX,
+		},
+		{
+			name:       "test decimal complex",
+			source:     "5.1i",
+			expTokType: token.COMPLEX,
+		},
+		{
+			name:       "test exp complex",
+			source:     "5.1e-2i",
+			expTokType: token.COMPLEX,
+		},
+	}
+	for _, tc := range tests {
+		s := NewScanner(tc.source)
+		tok, err := s.scanNumber()
+		assert.Equal(t, tc.expTokType, tok.TokenType, tc.name)
+		assert.Equal(t, tc.source, tok.Lexeme, tc.name)
+		assert.Nil(t, err, tc.name)
+	}
+}

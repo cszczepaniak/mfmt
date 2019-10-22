@@ -1,10 +1,15 @@
 package scanner
 
-import "github.com/cszczepaniak/mfmt/token"
+import (
+	"unicode"
+
+	"github.com/cszczepaniak/mfmt/token"
+)
 
 // Scanner stores state
 type Scanner struct {
 	source  []rune
+	c       rune
 	start   int
 	current int
 	line    int
@@ -21,6 +26,7 @@ func NewScanner(source string) *Scanner {
 	scanner.source = []rune(source)
 	scanner.start, scanner.current, scanner.line = 0, 0, 1
 	scanner.tokens = make([]token.Token, 0)
+	scanner.c = scanner.source[0]
 	return &scanner
 }
 
@@ -122,34 +128,33 @@ func (s *Scanner) scanWord() {
 	s.tokens = append(s.tokens, s.makeToken(tokType))
 }
 
-func (s *Scanner) scanNumber() {
-	isFloat, isComplex := false, false
+func (s *Scanner) scanNumber() (token.Token, error) {
+	tokType := token.INT
 	// Integer part
 	s.consumeDigits()
 	// Check for fractional part
-	if s.peek() == '.' && isDigit(s.peekNext()) {
-		isFloat = true
+	if s.c == '.' && isDigit(s.peek()) {
+		tokType = token.FLOAT
 		s.advance()
 		s.consumeDigits()
 	}
 	// Check for scientific notation
-	if (s.peek() == 'e' || s.peek() == 'E') && isDigit(s.peekNext()) {
-		isFloat = true
+	if unicode.ToLower(s.c) == 'e' && isDigit(s.peek()) {
+		tokType = token.FLOAT
 		s.advance()
 		s.consumeDigits()
 	}
 	// Check for complex
-	if s.peek() == 'i' || s.peek() == 'j' {
-		isComplex = true
+	if s.c == 'i' || s.c == 'j' {
+		tokType = token.COMPLEX
 		s.advance()
 	}
-	if isComplex {
-		s.tokens = append(s.tokens, s.makeToken(token.COMPLEX))
-	} else if isFloat {
-		s.tokens = append(s.tokens, s.makeToken(token.FLOAT))
-	} else {
-		s.tokens = append(s.tokens, s.makeToken(token.INT))
+	tok := token.Token{
+		TokenType: tokType,
+		Lexeme:    string(s.source[s.start:s.current]),
+		Line:      s.line,
 	}
+	return tok, nil
 }
 
 func (s *Scanner) consumeDigits() {
@@ -194,12 +199,12 @@ func (s *Scanner) isAtEnd() bool {
 	return s.current == len(s.source)
 }
 
-// peek looks at the current character without consuming it
+// peek looks at the next character without advancing
 func (s *Scanner) peek() rune {
-	if s.isAtEnd() {
+	if s.current+1 >= len(s.source) {
 		return 0
 	}
-	return s.source[s.current]
+	return s.source[s.current+1]
 }
 
 func (s *Scanner) peekNext() rune {
@@ -210,11 +215,11 @@ func (s *Scanner) peekNext() rune {
 }
 
 // advance consumes and returns the current character
-func (s *Scanner) advance() rune {
+func (s *Scanner) advance() {
 	if !s.isAtEnd() {
 		s.current++
 	}
-	return s.source[s.current-1]
+	s.c = s.source[s.current]
 }
 
 func (s *Scanner) retreat() {
