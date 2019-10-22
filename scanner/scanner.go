@@ -1,6 +1,7 @@
 package scanner
 
 import (
+	"errors"
 	"unicode"
 
 	"github.com/cszczepaniak/mfmt/token"
@@ -10,8 +11,8 @@ import (
 type Scanner struct {
 	source  []rune
 	c       rune
-	start   int
-	current int
+	idx     int
+	readIdx int
 	line    int
 	tokens  []token.Token
 }
@@ -24,7 +25,7 @@ type Scanner struct {
 func NewScanner(source string) *Scanner {
 	var scanner Scanner
 	scanner.source = []rune(source)
-	scanner.start, scanner.current, scanner.line = 0, 0, 1
+	scanner.idx, scanner.readIdx, scanner.line = 0, 1, 1
 	scanner.tokens = make([]token.Token, 0)
 	scanner.c = scanner.source[0]
 	return &scanner
@@ -39,7 +40,7 @@ func isDigit(c rune) bool {
 }
 
 func (s *Scanner) scanToken() {
-	s.start = s.current
+	s.idx = s.readIdx
 	s.advance()
 	switch s.c {
 	// One-character tokens are up first
@@ -123,26 +124,35 @@ func (s *Scanner) scanWord() {
 	for !s.isAtEnd() && (isAlpha(c) || isDigit(c) || c == '_') {
 		s.advance()
 	}
-	word := string(s.source[s.start:s.current])
+	word := string(s.source[s.idx:s.readIdx])
 	tokType := token.Lookup(word)
 	s.tokens = append(s.tokens, s.makeToken(tokType))
 }
 
-func (s *Scanner) scanNumber() (token.Token, error) {
+func (s *Scanner) scanNumber() (*token.Token, error) {
 	tokType := token.INT
 	// Integer part
 	s.consumeDigits()
 	// Check for fractional part
-	if s.c == '.' && isDigit(s.peek()) {
+	if s.c == '.' {
 		tokType = token.FLOAT
 		s.advance()
-		s.consumeDigits()
+		n := s.consumeDigits()
+		if n == 0 {
+			return nil, errors.New("Illegal number literal")
+		}
 	}
 	// Check for scientific notation
-	if unicode.ToLower(s.c) == 'e' && isDigit(s.peek()) {
+	if unicode.ToLower(s.c) == 'e' {
 		tokType = token.FLOAT
 		s.advance()
-		s.consumeDigits()
+		if s.c == '-' {
+			s.advance()
+		}
+		n := s.consumeDigits()
+		if n == 0 {
+			return nil, errors.New("Illegal number literal")
+		}
 	}
 	// Check for complex
 	if s.c == 'i' || s.c == 'j' {
@@ -151,16 +161,22 @@ func (s *Scanner) scanNumber() (token.Token, error) {
 	}
 	tok := token.Token{
 		TokenType: tokType,
-		Lexeme:    string(s.source[s.start:s.current]),
+		Lexeme:    string(s.source[s.idx:s.readIdx]),
 		Line:      s.line,
 	}
-	return tok, nil
+	return &tok, nil
 }
 
-func (s *Scanner) consumeDigits() {
-	for !s.isAtEnd() && isDigit(s.peek()) {
+func (s *Scanner) consumeDigits() int {
+	i := 0
+	for isDigit(s.c) {
 		s.advance()
+		i++
+		if s.isAtEnd() {
+			break
+		}
 	}
+	return i
 }
 
 func (s *Scanner) scanDot() {
@@ -186,7 +202,7 @@ func (s *Scanner) scanDot() {
 }
 
 func (s *Scanner) makeToken(tokenType token.Type) token.Token {
-	str := s.source[s.start:s.current]
+	str := s.source[s.idx:s.readIdx]
 	return token.Token{
 		TokenType: tokenType,
 		Lexeme:    string(str),
@@ -196,35 +212,31 @@ func (s *Scanner) makeToken(tokenType token.Type) token.Token {
 
 // isAtEnd checks if current is pointing at the end of the file
 func (s *Scanner) isAtEnd() bool {
-	return s.current == len(s.source)
+	return s.readIdx == len(s.source)
 }
 
 // peek looks at the next character without advancing
 func (s *Scanner) peek() rune {
-	if s.current+1 >= len(s.source) {
+	if s.readIdx > len(s.source) {
 		return 0
 	}
-	return s.source[s.current+1]
-}
-
-func (s *Scanner) peekNext() rune {
-	if s.current+1 >= len(s.source) {
-		return 0
-	}
-	return s.source[s.current+1]
+	return s.source[s.readIdx]
 }
 
 // advance consumes and returns the current character
 func (s *Scanner) advance() {
 	if !s.isAtEnd() {
-		s.current++
+		c := s.source[s.readIdx]
+		s.readIdx++
+		s.c = c
+	} else {
+		s.c = 0
 	}
-	s.c = s.source[s.current]
 }
 
 func (s *Scanner) retreat() {
-	if s.current > 0 {
-		s.current--
+	if s.readIdx > 0 {
+		s.readIdx--
 	}
 }
 
@@ -233,9 +245,9 @@ func (s *Scanner) match(c rune) bool {
 	if s.isAtEnd() {
 		return false
 	}
-	if s.source[s.current] != c {
+	if s.source[s.readIdx] != c {
 		return false
 	}
-	s.current++
+	s.readIdx++
 	return true
 }

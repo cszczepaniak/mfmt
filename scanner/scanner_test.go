@@ -164,13 +164,18 @@ func TestScanner_scanNumber(t *testing.T) {
 			expTokType: token.FLOAT,
 		},
 		{
+			name:       "test no leading zero",
+			source:     ".34",
+			expTokType: token.FLOAT,
+		},
+		{
 			name:       "test exp",
 			source:     "1e4",
 			expTokType: token.FLOAT,
 		},
 		{
 			name:       "test decimal exp",
-			source:     "1.1e4",
+			source:     "1.1E4",
 			expTokType: token.FLOAT,
 		},
 		{
@@ -197,8 +202,31 @@ func TestScanner_scanNumber(t *testing.T) {
 	for _, tc := range tests {
 		s := NewScanner(tc.source)
 		tok, err := s.scanNumber()
+		assert.Nil(t, err, tc.name)
 		assert.Equal(t, tc.expTokType, tok.TokenType, tc.name)
 		assert.Equal(t, tc.source, tok.Lexeme, tc.name)
-		assert.Nil(t, err, tc.name)
+	}
+}
+func TestErrsScanner_scanNumber(t *testing.T) {
+	tests := []struct {
+		name   string
+		source string
+		expErr string
+	}{
+		{
+			name:   "test trailing .",
+			source: "1234.",
+			expErr: "Invalid number literal",
+		},
+		{
+			name:   "test trailing e",
+			source: "1234e",
+			expErr: "Invalid number literal",
+		},
+	}
+	for _, tc := range tests {
+		s := NewScanner(tc.source)
+		_, err := s.scanNumber()
+		assert.Error(t, err, tc.name)
 	}
 }
