@@ -186,6 +186,11 @@ func TestScanner_scanToken(t *testing.T) {
 			expect: token.Token{TokenType: token.FLOAT, Lexeme: "12.1234", Line: 1},
 		},
 		{
+			name:   "test no leading zero",
+			source: ".1234",
+			expect: token.Token{TokenType: token.FLOAT, Lexeme: ".1234", Line: 1},
+		},
+		{
 			name:   "test illegal float",
 			source: "12.1234e",
 			expect: token.Token{TokenType: token.ILLEGAL, Lexeme: "12.1234e", Line: 1},
