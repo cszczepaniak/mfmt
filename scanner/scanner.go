@@ -129,7 +129,7 @@ func (s *Scanner) scanWord() {
 	s.tokens = append(s.tokens, s.makeToken(tokType))
 }
 
-func (s *Scanner) scanNumber() (*token.Token, error) {
+func (s *Scanner) scanNumber() (token.Token, error) {
 	tokType := token.INT
 	// Integer part
 	s.consumeDigits()
@@ -139,7 +139,7 @@ func (s *Scanner) scanNumber() (*token.Token, error) {
 		s.advance()
 		n := s.consumeDigits()
 		if n == 0 {
-			return nil, errors.New("Illegal number literal")
+			return token.Token{}, errors.New("Illegal number literal")
 		}
 	}
 	// Check for scientific notation
@@ -151,7 +151,7 @@ func (s *Scanner) scanNumber() (*token.Token, error) {
 		}
 		n := s.consumeDigits()
 		if n == 0 {
-			return nil, errors.New("Illegal number literal")
+			return token.Token{}, errors.New("Illegal number literal")
 		}
 	}
 	// Check for complex
@@ -164,7 +164,7 @@ func (s *Scanner) scanNumber() (*token.Token, error) {
 		Lexeme:    string(s.source[s.idx:s.readIdx]),
 		Line:      s.line,
 	}
-	return &tok, nil
+	return tok, nil
 }
 
 func (s *Scanner) consumeDigits() int {
