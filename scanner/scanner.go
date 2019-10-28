@@ -119,14 +119,20 @@ func (s *Scanner) scanToken() {
 	}
 }
 
-func (s *Scanner) scanWord() {
-	c := s.peek()
-	for !s.isAtEnd() && (isAlpha(c) || isDigit(c) || c == '_') {
+func (s *Scanner) scanWord() (token.Token, error) {
+	tokType := token.IDENT
+	for !s.isAtEnd() && (isAlpha(s.c) || isDigit(s.c) || s.c == '_') {
 		s.advance()
 	}
 	word := string(s.source[s.idx:s.readIdx])
-	tokType := token.Lookup(word)
-	s.tokens = append(s.tokens, s.makeToken(tokType))
+	if !token.IsIdentifier(word) {
+		if token.IsKeyword(word) {
+			tokType = token.Lookup(word)
+		} else {
+			return token.Token{}, errors.New("Invalid identifier")
+		}
+	}
+	return s.makeToken(tokType), nil
 }
 
 func (s *Scanner) scanNumber() (token.Token, error) {
@@ -159,12 +165,7 @@ func (s *Scanner) scanNumber() (token.Token, error) {
 		tokType = token.COMPLEX
 		s.advance()
 	}
-	tok := token.Token{
-		TokenType: tokType,
-		Lexeme:    string(s.source[s.idx:s.readIdx]),
-		Line:      s.line,
-	}
-	return tok, nil
+	return s.makeToken(tokType), nil
 }
 
 func (s *Scanner) consumeDigits() int {

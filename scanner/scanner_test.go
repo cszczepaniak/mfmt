@@ -230,3 +230,29 @@ func TestErrsScanner_scanNumber(t *testing.T) {
 		assert.Error(t, err, tc.name)
 	}
 }
+
+func TestScanner_scanWord(t *testing.T) {
+	tests := []struct {
+		name       string
+		source     string
+		expTokType token.Type
+	}{
+		{
+			name:       "test identifier",
+			source:     "abc123",
+			expTokType: token.IDENT,
+		},
+		{
+			name:       "test keyword",
+			source:     "classdef",
+			expTokType: token.CLASSDEF,
+		},
+	}
+	for _, tc := range tests {
+		s := NewScanner(tc.source)
+		tok, err := s.scanWord()
+		assert.Nil(t, err, tc.name)
+		assert.Equal(t, tc.expTokType, tok.TokenType, tc.name)
+		assert.Equal(t, tc.source, tok.Lexeme, tc.name)
+	}
+}
