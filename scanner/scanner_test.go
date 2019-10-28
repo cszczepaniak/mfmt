@@ -243,6 +243,11 @@ func TestScanner_scanWord(t *testing.T) {
 			expTokType: token.IDENT,
 		},
 		{
+			name:       "test identifier",
+			source:     "abc_123",
+			expTokType: token.IDENT,
+		},
+		{
 			name:       "test keyword",
 			source:     "classdef",
 			expTokType: token.CLASSDEF,
@@ -254,5 +259,24 @@ func TestScanner_scanWord(t *testing.T) {
 		assert.Nil(t, err, tc.name)
 		assert.Equal(t, tc.expTokType, tok.TokenType, tc.name)
 		assert.Equal(t, tc.source, tok.Lexeme, tc.name)
+	}
+}
+
+func TestErrsScanner_scanWord(t *testing.T) {
+	tests := []struct {
+		name       string
+		source     string
+		expTokType token.Type
+	}{
+		{
+			name:       "test invalid identifier",
+			source:     "_abc123",
+			expTokType: token.IDENT,
+		},
+	}
+	for _, tc := range tests {
+		s := NewScanner(tc.source)
+		_, err := s.scanWord()
+		assert.Error(t, err, tc.name)
 	}
 }
