@@ -306,6 +306,12 @@ func TestScanner_scanDot(t *testing.T) {
 			expTokType: 0,
 			expError:   true,
 		},
+		{
+			name:       "test single dot",
+			source:     ".a",
+			expTokType: token.PERIOD,
+			expError:   false,
+		},
 	}
 	for _, tc := range tests {
 		s := NewScanner(tc.source)
