@@ -180,26 +180,35 @@ func (s *Scanner) consumeDigits() int {
 	return i
 }
 
-func (s *Scanner) scanDot() {
-	switch {
-	case s.match('*'):
-		s.tokens = append(s.tokens, s.makeToken(token.ELEM_MUL))
-	case s.match('/'):
-		s.tokens = append(s.tokens, s.makeToken(token.ELEM_RDIV))
-	case s.match('\\'):
-		s.tokens = append(s.tokens, s.makeToken(token.ELEM_LDIV))
-	case s.match('^'):
-		s.tokens = append(s.tokens, s.makeToken(token.ELEM_PWR))
-	case s.match('\''):
-		s.tokens = append(s.tokens, s.makeToken(token.TRANSP))
-	default:
-		// Check for ellipsis
-		if s.match('.') && s.match('.') {
-			s.tokens = append(s.tokens, s.makeToken(token.ELLIPSIS))
+func (s *Scanner) scanDot() (token.Token, error) {
+	tokType := token.PERIOD
+	s.advance()
+	switch s.c {
+	case '*':
+		tokType = token.ELEM_MUL
+		s.advance()
+	case '/':
+		tokType = token.ELEM_RDIV
+		s.advance()
+	case '\\':
+		tokType = token.ELEM_LDIV
+		s.advance()
+	case '^':
+		tokType = token.ELEM_PWR
+		s.advance()
+	case '\'':
+		tokType = token.TRANSP
+		s.advance()
+	case '.':
+		if s.peek() == '.' {
+			tokType = token.ELLIPSIS
+			s.advance()
+			s.advance()
 		} else {
-			s.tokens = append(s.tokens, s.makeToken(token.ILLEGAL))
+			return token.Token{}, errors.New("Syntax error")
 		}
 	}
+	return s.makeToken(tokType), nil
 }
 
 func (s *Scanner) makeToken(tokenType token.Type) token.Token {
@@ -218,7 +227,7 @@ func (s *Scanner) isAtEnd() bool {
 
 // peek looks at the next character without advancing
 func (s *Scanner) peek() rune {
-	if s.readIdx > len(s.source) {
+	if s.readIdx >= len(s.source) {
 		return 0
 	}
 	return s.source[s.readIdx]

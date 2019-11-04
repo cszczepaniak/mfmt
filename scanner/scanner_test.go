@@ -280,3 +280,42 @@ func TestErrsScanner_scanWord(t *testing.T) {
 		assert.Error(t, err, tc.name)
 	}
 }
+
+func TestScanner_scanDot(t *testing.T) {
+	tests := []struct {
+		name       string
+		source     string
+		expTokType token.Type
+		expError   bool
+	}{
+		{
+			name:       "test element wise multiplication",
+			source:     ".*",
+			expTokType: token.ELEM_MUL,
+			expError:   false,
+		},
+		{
+			name:       "test ellipsis",
+			source:     "...",
+			expTokType: token.ELLIPSIS,
+			expError:   false,
+		},
+		{
+			name:       "test two dots",
+			source:     "..",
+			expTokType: 0,
+			expError:   true,
+		},
+	}
+	for _, tc := range tests {
+		s := NewScanner(tc.source)
+		tok, err := s.scanDot()
+		if tc.expError {
+			assert.Error(t, err, tc.name)
+		} else {
+			assert.Nil(t, err, tc.name)
+			assert.Equal(t, tc.expTokType, tok.TokenType, tc.name)
+			assert.Equal(t, tc.source, tok.Lexeme, tc.name)
+		}
+	}
+}
