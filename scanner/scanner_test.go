@@ -325,3 +325,53 @@ func TestScanner_scanDot(t *testing.T) {
 		}
 	}
 }
+
+func TestScanner_scanString(t *testing.T) {
+	tests := []struct {
+		name       string
+		source     string
+		expTokType token.Type
+	}{
+		{
+			name:       "test string",
+			source:     "\"abc123\"",
+			expTokType: token.STRING,
+		},
+		{
+			name:       "test another string",
+			source:     "\"abc123\"",
+			expTokType: token.STRING,
+		},
+	}
+	for _, tc := range tests {
+		s := NewScanner(tc.source)
+		tok, err := s.scanString()
+		assert.Nil(t, err, tc.name)
+		assert.Equal(t, tc.expTokType, tok.TokenType, tc.name)
+		assert.Equal(t, tc.source, tok.Lexeme, tc.name)
+	}
+}
+
+func TestErrsScanner_scanString(t *testing.T) {
+	tests := []struct {
+		name   string
+		source string
+		expErr string
+	}{
+		{
+			name:   "test unterminated string",
+			source: "\"abc",
+			expErr: "Unterminated string literal",
+		},
+		{
+			name:   "test new line in string",
+			source: "\"a\na\"",
+			expErr: "Unterminated string literal",
+		},
+	}
+	for _, tc := range tests {
+		s := NewScanner(tc.source)
+		_, err := s.scanString()
+		assert.Error(t, err, tc.name)
+	}
+}

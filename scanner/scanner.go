@@ -68,6 +68,8 @@ func (s *Scanner) scanToken() {
 		s.tokens = append(s.tokens, s.makeToken(token.COLON))
 	case ',':
 		s.tokens = append(s.tokens, s.makeToken(token.COMMA))
+	case '\'':
+		s.tokens = append(s.tokens, s.makeToken(token.COMMA))
 	// Next handle two-character operators
 	case '~':
 		if s.match('=') {
@@ -209,6 +211,19 @@ func (s *Scanner) scanDot() (token.Token, error) {
 		}
 	}
 	return s.makeToken(tokType), nil
+}
+
+func (s *Scanner) scanString() (token.Token, error) {
+	// Assume the current character is the opening "
+	s.advance()
+	for s.c != '"' {
+		s.advance()
+		if s.c == '\n' || s.isAtEnd() {
+			return token.Token{}, errors.New("Unterminated string literal")
+		}
+	}
+	s.advance()
+	return s.makeToken(token.STRING), nil
 }
 
 func (s *Scanner) makeToken(tokenType token.Type) token.Token {
