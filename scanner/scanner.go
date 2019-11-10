@@ -21,8 +21,8 @@ type Scanner struct {
 // and should also define functions used to scan various token types in
 // a MATLAB source file.
 
-// NewScanner instantiates a scanner
-func NewScanner(source string) *Scanner {
+// New instantiates a scanner
+func New(source string) *Scanner {
 	var scanner Scanner
 	scanner.source = []rune(source)
 	scanner.idx, scanner.readIdx, scanner.line = 0, 1, 1
@@ -96,13 +96,9 @@ func (s *Scanner) scanToken() {
 			s.tokens = append(s.tokens, s.makeToken(token.GTR))
 		}
 	case '.':
-		// The dot is interesting because of ellipses and number literals with no leading zero
-		if isDigit(s.peek()) {
-			s.retreat()
-			s.scanNumber()
-		} else {
-			s.scanDot()
-		}
+		s.scanDot()
+	case '"':
+		s.scanString()
 	case '\r', '\f', '\t', '\v':
 		// Skip whitespace
 	case '\n':

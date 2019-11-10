@@ -60,7 +60,7 @@ func TestScanner_scanNumber(t *testing.T) {
 		},
 	}
 	for _, tc := range tests {
-		s := NewScanner(tc.source)
+		s := New(tc.source)
 		tok, err := s.scanNumber()
 		assert.Nil(t, err, tc.name)
 		assert.Equal(t, tc.expTokType, tok.TokenType, tc.name)
@@ -85,7 +85,7 @@ func TestErrsScanner_scanNumber(t *testing.T) {
 		},
 	}
 	for _, tc := range tests {
-		s := NewScanner(tc.source)
+		s := New(tc.source)
 		_, err := s.scanNumber()
 		assert.Error(t, err, tc.name)
 	}
@@ -114,7 +114,7 @@ func TestScanner_scanWord(t *testing.T) {
 		},
 	}
 	for _, tc := range tests {
-		s := NewScanner(tc.source)
+		s := New(tc.source)
 		tok, err := s.scanWord()
 		assert.Nil(t, err, tc.name)
 		assert.Equal(t, tc.expTokType, tok.TokenType, tc.name)
@@ -135,7 +135,7 @@ func TestErrsScanner_scanWord(t *testing.T) {
 		},
 	}
 	for _, tc := range tests {
-		s := NewScanner(tc.source)
+		s := New(tc.source)
 		_, err := s.scanWord()
 		assert.Error(t, err, tc.name)
 	}
@@ -174,7 +174,7 @@ func TestScanner_scanDot(t *testing.T) {
 		},
 	}
 	for _, tc := range tests {
-		s := NewScanner(tc.source)
+		s := New(tc.source)
 		tok, err := s.scanDot()
 		if tc.expError {
 			assert.Error(t, err, tc.name)
@@ -204,7 +204,7 @@ func TestScanner_scanString(t *testing.T) {
 		},
 	}
 	for _, tc := range tests {
-		s := NewScanner(tc.source)
+		s := New(tc.source)
 		tok, err := s.scanString()
 		assert.Nil(t, err, tc.name)
 		assert.Equal(t, tc.expTokType, tok.TokenType, tc.name)
@@ -230,7 +230,7 @@ func TestErrsScanner_scanString(t *testing.T) {
 		},
 	}
 	for _, tc := range tests {
-		s := NewScanner(tc.source)
+		s := New(tc.source)
 		_, err := s.scanString()
 		assert.Error(t, err, tc.name)
 	}
