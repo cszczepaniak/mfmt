@@ -138,11 +138,12 @@ func (s *Scanner) scanToken() {
 }
 
 func (s *Scanner) scanWord() (token.Token, error) {
+	start := s.idx
 	tokType := token.IDENT
-	for !s.isAtEnd() && (isAlpha(s.c) || isDigit(s.c) || s.c == '_') {
+	for isAlpha(s.c) || isDigit(s.c) || s.c == '_' {
 		s.advance()
 	}
-	word := string(s.source[s.idx:s.readIdx])
+	word := string(s.source[start:s.idx])
 	if !token.IsIdentifier(word) {
 		if token.IsKeyword(word) {
 			tokType = token.Lookup(word)
@@ -150,7 +151,7 @@ func (s *Scanner) scanWord() (token.Token, error) {
 			return token.Token{}, errors.New("Invalid identifier")
 		}
 	}
-	return s.makeToken(tokType), nil
+	return token.Token{TokenType: tokType, Lexeme: word, Line: s.line}, nil
 }
 
 func (s *Scanner) scanNumber() (token.Token, error) {

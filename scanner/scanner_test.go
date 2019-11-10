@@ -112,21 +112,37 @@ func TestScanner_scanWord(t *testing.T) {
 		name       string
 		source     string
 		expTokType token.Type
+		expLexeme  string
 	}{
+		{
+			name:       "test identifier followed by something else",
+			source:     "abc123 = 5;",
+			expTokType: token.IDENT,
+			expLexeme:  "abc123",
+		},
+		{
+			name:       "test keyword followed by something else",
+			source:     "if myBool == 3",
+			expTokType: token.IF,
+			expLexeme:  "if",
+		},
 		{
 			name:       "test identifier",
 			source:     "abc123",
 			expTokType: token.IDENT,
+			expLexeme:  "abc123",
 		},
 		{
 			name:       "test identifier",
 			source:     "abc_123",
 			expTokType: token.IDENT,
+			expLexeme:  "abc_123",
 		},
 		{
 			name:       "test keyword",
 			source:     "classdef",
 			expTokType: token.CLASSDEF,
+			expLexeme:  "classdef",
 		},
 	}
 	for _, tc := range tests {
@@ -134,7 +150,7 @@ func TestScanner_scanWord(t *testing.T) {
 		tok, err := s.scanWord()
 		assert.Nil(t, err, tc.name)
 		assert.Equal(t, tc.expTokType, tok.TokenType, tc.name)
-		assert.Equal(t, tc.source, tok.Lexeme, tc.name)
+		assert.Equal(t, tc.expLexeme, tok.Lexeme, tc.name)
 	}
 }
 
