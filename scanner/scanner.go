@@ -59,7 +59,7 @@ func (s *Scanner) scanToken() {
 	switch {
 	case isAlpha(s.c):
 		s.scanWord()
-	case isDigit(s.c):
+	case isDigit(s.c) || s.c == '.':
 		if tok, err := s.scanNumber(); err == nil {
 			s.tokens = append(s.tokens, tok)
 		} else {
