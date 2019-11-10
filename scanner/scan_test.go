@@ -16,7 +16,7 @@ func TestScanFile(t *testing.T) {
 		{
 			name:        "test simple file",
 			sourceFile:  "testdata/simple.m",
-			expTokTypes: []token.Type{token.INT, token.MUL, token.INT, token.ADD, token.FLOAT, token.EOF},
+			expTokTypes: []token.Type{token.INT, token.ADD, token.INT, token.EOF},
 		},
 	}
 	for _, tc := range tests {

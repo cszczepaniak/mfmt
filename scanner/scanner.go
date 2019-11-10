@@ -43,7 +43,7 @@ func ScanFile(path string) *Scanner {
 	for !s.isAtEnd() {
 		s.scanToken()
 	}
-	s.tokens = append(s.tokens, s.makeToken(token.EOF))
+	s.tokens = append(s.tokens, token.Token{TokenType: token.EOF, Lexeme: "", Line: s.line})
 	return s
 }
 
@@ -56,84 +56,84 @@ func isDigit(c rune) bool {
 }
 
 func (s *Scanner) scanToken() {
-	s.idx = s.readIdx
-	s.advance()
-	switch s.c {
-	// One-character tokens are up first
-	case '+':
-		s.tokens = append(s.tokens, s.makeToken(token.ADD))
-	case '-':
-		s.tokens = append(s.tokens, s.makeToken(token.SUB))
-	case '*':
-		s.tokens = append(s.tokens, s.makeToken(token.MUL))
-	case '\\':
-		s.tokens = append(s.tokens, s.makeToken(token.LDIV))
-	case '(':
-		s.tokens = append(s.tokens, s.makeToken(token.LPAREN))
-	case ')':
-		s.tokens = append(s.tokens, s.makeToken(token.RPAREN))
-	case '[':
-		s.tokens = append(s.tokens, s.makeToken(token.LBRACK))
-	case ']':
-		s.tokens = append(s.tokens, s.makeToken(token.RBRACK))
-	case '{':
-		s.tokens = append(s.tokens, s.makeToken(token.LBRACE))
-	case ';':
-		s.tokens = append(s.tokens, s.makeToken(token.SEMICOLON))
-	case ':':
-		s.tokens = append(s.tokens, s.makeToken(token.COLON))
-	case ',':
-		s.tokens = append(s.tokens, s.makeToken(token.COMMA))
-	case '\'':
-		s.tokens = append(s.tokens, s.makeToken(token.COMMA))
-	// Next handle two-character operators
-	case '~':
-		if s.peek() == '=' {
-			s.advance()
-			s.tokens = append(s.tokens, s.makeToken(token.NEQ))
+	switch {
+	case isAlpha(s.c):
+		s.scanWord()
+	case isDigit(s.c):
+		if tok, err := s.scanNumber(); err == nil {
+			s.tokens = append(s.tokens, tok)
 		} else {
-			s.tokens = append(s.tokens, s.makeToken(token.NOT))
+			panic(err)
 		}
-	case '=':
-		if s.peek() == '=' {
-			s.advance()
-			s.tokens = append(s.tokens, s.makeToken(token.EQL))
-		} else {
-			s.tokens = append(s.tokens, s.makeToken(token.ASSIGN))
-		}
-	case '<':
-		if s.peek() == '=' {
-			s.advance()
-			s.tokens = append(s.tokens, s.makeToken(token.LEQ))
-		} else {
-			s.tokens = append(s.tokens, s.makeToken(token.LSS))
-		}
-	case '>':
-		if s.peek() == '=' {
-			s.advance()
-			s.tokens = append(s.tokens, s.makeToken(token.GEQ))
-		} else {
-			s.tokens = append(s.tokens, s.makeToken(token.GTR))
-		}
-	case '.':
-		s.scanDot()
-	case '"':
-		s.scanString()
-	case '\r', '\f', '\t', '\v':
-		// Skip whitespace
-	case '\n':
-		// Handle new lines
-		s.line++
 	default:
-		// Check for literals in default case
-		switch {
-		case isAlpha(s.c):
-			s.scanWord()
-		case isDigit(s.c):
-			s.scanNumber()
-		default:
-			s.tokens = append(s.tokens, s.makeToken(token.ILLEGAL))
+		switch s.c {
+		// One-character tokens are up first
+		case '+':
+			s.tokens = append(s.tokens, s.makeToken(token.ADD))
+		case '-':
+			s.tokens = append(s.tokens, s.makeToken(token.SUB))
+		case '*':
+			s.tokens = append(s.tokens, s.makeToken(token.MUL))
+		case '\\':
+			s.tokens = append(s.tokens, s.makeToken(token.LDIV))
+		case '(':
+			s.tokens = append(s.tokens, s.makeToken(token.LPAREN))
+		case ')':
+			s.tokens = append(s.tokens, s.makeToken(token.RPAREN))
+		case '[':
+			s.tokens = append(s.tokens, s.makeToken(token.LBRACK))
+		case ']':
+			s.tokens = append(s.tokens, s.makeToken(token.RBRACK))
+		case '{':
+			s.tokens = append(s.tokens, s.makeToken(token.LBRACE))
+		case ';':
+			s.tokens = append(s.tokens, s.makeToken(token.SEMICOLON))
+		case ':':
+			s.tokens = append(s.tokens, s.makeToken(token.COLON))
+		case ',':
+			s.tokens = append(s.tokens, s.makeToken(token.COMMA))
+		case '\'':
+			s.tokens = append(s.tokens, s.makeToken(token.COMMA))
+			// Next handle two-character operators
+		case '~':
+			if s.peek() == '=' {
+				s.advance()
+				s.tokens = append(s.tokens, s.makeToken(token.NEQ))
+			} else {
+				s.tokens = append(s.tokens, s.makeToken(token.NOT))
+			}
+		case '=':
+			if s.peek() == '=' {
+				s.advance()
+				s.tokens = append(s.tokens, s.makeToken(token.EQL))
+			} else {
+				s.tokens = append(s.tokens, s.makeToken(token.ASSIGN))
+			}
+		case '<':
+			if s.peek() == '=' {
+				s.advance()
+				s.tokens = append(s.tokens, s.makeToken(token.LEQ))
+			} else {
+				s.tokens = append(s.tokens, s.makeToken(token.LSS))
+			}
+		case '>':
+			if s.peek() == '=' {
+				s.advance()
+				s.tokens = append(s.tokens, s.makeToken(token.GEQ))
+			} else {
+				s.tokens = append(s.tokens, s.makeToken(token.GTR))
+			}
+		case '.':
+			s.scanDot()
+		case '"':
+			s.scanString()
+		case '\r', '\f', '\t', '\v':
+			// Skip whitespace
+		case '\n':
+			// Handle new lines
+			s.line++
 		}
+		s.advance()
 	}
 }
 
@@ -154,6 +154,7 @@ func (s *Scanner) scanWord() (token.Token, error) {
 }
 
 func (s *Scanner) scanNumber() (token.Token, error) {
+	start := s.idx
 	tokType := token.INT
 	// Integer part
 	s.consumeDigits()
@@ -183,7 +184,11 @@ func (s *Scanner) scanNumber() (token.Token, error) {
 		tokType = token.COMPLEX
 		s.advance()
 	}
-	return s.makeToken(tokType), nil
+	return token.Token{
+		TokenType: tokType,
+		Lexeme:    string(s.source[start:s.idx]),
+		Line:      s.line,
+	}, nil
 }
 
 func (s *Scanner) consumeDigits() int {
@@ -191,9 +196,6 @@ func (s *Scanner) consumeDigits() int {
 	for isDigit(s.c) {
 		s.advance()
 		i++
-		if s.isAtEnd() {
-			break
-		}
 	}
 	return i
 }
@@ -243,7 +245,7 @@ func (s *Scanner) scanString() (token.Token, error) {
 }
 
 func (s *Scanner) makeToken(tokenType token.Type) token.Token {
-	str := s.source[s.idx:s.readIdx]
+	str := s.source[s.idx : s.readIdx-1]
 	return token.Token{
 		TokenType: tokenType,
 		Lexeme:    string(str),
@@ -266,12 +268,14 @@ func (s *Scanner) peek() rune {
 
 // advance consumes and returns the current character
 func (s *Scanner) advance() {
-	if !s.isAtEnd() {
+	s.idx = s.readIdx
+	if s.readIdx < len(s.source) {
 		c := s.source[s.readIdx]
 		s.readIdx++
 		s.c = c
 	} else {
-		s.c = 0
+		s.idx = len(s.source)
+		s.c = -1
 	}
 }
 
