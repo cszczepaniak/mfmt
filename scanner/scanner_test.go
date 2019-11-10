@@ -12,51 +12,67 @@ func TestScanner_scanNumber(t *testing.T) {
 		name       string
 		source     string
 		expTokType token.Type
+		expLexeme  string
 	}{
+		{
+			name:       "test int with trailing nonint char",
+			source:     "1234+",
+			expTokType: token.INT,
+			expLexeme:  "1234",
+		},
 		{
 			name:       "test int",
 			source:     "1234",
 			expTokType: token.INT,
+			expLexeme:  "1234",
 		},
 		{
 			name:       "test float",
 			source:     "12.34",
 			expTokType: token.FLOAT,
+			expLexeme:  "12.34",
 		},
 		{
 			name:       "test no leading zero",
 			source:     ".34",
 			expTokType: token.FLOAT,
+			expLexeme:  ".34",
 		},
 		{
 			name:       "test exp",
 			source:     "1e4",
 			expTokType: token.FLOAT,
+			expLexeme:  "1e4",
 		},
 		{
 			name:       "test decimal exp",
 			source:     "1.1E4",
 			expTokType: token.FLOAT,
+			expLexeme:  "1.1E4",
 		},
 		{
 			name:       "test neg exp",
 			source:     "1.1e-4",
 			expTokType: token.FLOAT,
+			expLexeme:  "1.1e-4",
 		},
 		{
 			name:       "test complex",
 			source:     "5j",
 			expTokType: token.COMPLEX,
+			expLexeme:  "5j",
 		},
 		{
 			name:       "test decimal complex",
 			source:     "5.1i",
 			expTokType: token.COMPLEX,
+			expLexeme:  "5.1i",
 		},
 		{
 			name:       "test exp complex",
 			source:     "5.1e-2i",
 			expTokType: token.COMPLEX,
+			expLexeme:  "5.1e-2i",
 		},
 	}
 	for _, tc := range tests {
@@ -64,7 +80,7 @@ func TestScanner_scanNumber(t *testing.T) {
 		tok, err := s.scanNumber()
 		assert.Nil(t, err, tc.name)
 		assert.Equal(t, tc.expTokType, tok.TokenType, tc.name)
-		assert.Equal(t, tc.source, tok.Lexeme, tc.name)
+		assert.Equal(t, tc.expLexeme, tok.Lexeme, tc.name)
 	}
 }
 func TestErrsScanner_scanNumber(t *testing.T) {
@@ -233,5 +249,39 @@ func TestErrsScanner_scanString(t *testing.T) {
 		s := New(tc.source)
 		_, err := s.scanString()
 		assert.Error(t, err, tc.name)
+	}
+}
+
+func TestScanner_consumeDigits(t *testing.T) {
+	tests := []struct {
+		name         string
+		source       string
+		expNumDigits int
+		expReadIdx   int
+	}{
+		{
+			name:         "test just digits",
+			source:       "1234",
+			expNumDigits: 4,
+			expReadIdx:   4,
+		},
+		{
+			name:         "test digits followed by other stuff",
+			source:       "1234.1234",
+			expNumDigits: 4,
+			expReadIdx:   5,
+		},
+		{
+			name:         "no digits",
+			source:       ".1234",
+			expNumDigits: 0,
+			expReadIdx:   1,
+		},
+	}
+	for _, tc := range tests {
+		s := New(tc.source)
+		act := s.consumeDigits()
+		assert.Equal(t, tc.expNumDigits, act, tc.name, "(num digits)")
+		assert.Equal(t, tc.expReadIdx, s.readIdx, tc.name, "(read idx)")
 	}
 }
