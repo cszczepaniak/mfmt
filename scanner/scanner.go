@@ -216,7 +216,7 @@ func (s *Scanner) scanDot() (token.Token, error) {
 func (s *Scanner) scanString() (token.Token, error) {
 	// Assume the current character is the opening "
 	s.advance()
-	for s.c != '"' {
+	for s.peek() != '"' {
 		s.advance()
 		if s.c == '\n' || s.isAtEnd() {
 			return token.Token{}, errors.New("Unterminated string literal")
