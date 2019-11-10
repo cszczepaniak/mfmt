@@ -2,6 +2,7 @@ package scanner
 
 import (
 	"errors"
+	"io/ioutil"
 	"unicode"
 
 	"github.com/cszczepaniak/mfmt/token"
@@ -29,6 +30,21 @@ func New(source string) *Scanner {
 	scanner.tokens = make([]token.Token, 0)
 	scanner.c = scanner.source[0]
 	return &scanner
+}
+
+// ScanFile makes a list of tokens from the source
+func ScanFile(path string) *Scanner {
+	dat, err := ioutil.ReadFile(path)
+	if err != nil {
+		panic(err)
+	}
+	str := string(dat)
+	s := New(str)
+	for !s.isAtEnd() {
+		s.scanToken()
+	}
+	s.tokens = append(s.tokens, s.makeToken(token.EOF))
+	return s
 }
 
 func isAlpha(c rune) bool {
@@ -72,25 +88,29 @@ func (s *Scanner) scanToken() {
 		s.tokens = append(s.tokens, s.makeToken(token.COMMA))
 	// Next handle two-character operators
 	case '~':
-		if s.match('=') {
+		if s.peek() == '=' {
+			s.advance()
 			s.tokens = append(s.tokens, s.makeToken(token.NEQ))
 		} else {
 			s.tokens = append(s.tokens, s.makeToken(token.NOT))
 		}
 	case '=':
-		if s.match('=') {
+		if s.peek() == '=' {
+			s.advance()
 			s.tokens = append(s.tokens, s.makeToken(token.EQL))
 		} else {
 			s.tokens = append(s.tokens, s.makeToken(token.ASSIGN))
 		}
 	case '<':
-		if s.match('=') {
+		if s.peek() == '=' {
+			s.advance()
 			s.tokens = append(s.tokens, s.makeToken(token.LEQ))
 		} else {
 			s.tokens = append(s.tokens, s.makeToken(token.LSS))
 		}
 	case '>':
-		if s.match('=') {
+		if s.peek() == '=' {
+			s.advance()
 			s.tokens = append(s.tokens, s.makeToken(token.GEQ))
 		} else {
 			s.tokens = append(s.tokens, s.makeToken(token.GTR))
