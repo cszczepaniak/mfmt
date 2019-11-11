@@ -32,7 +32,7 @@ func TestLookup(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		got := Lookup(tt.ident)
+		got := LookupIdent(tt.ident)
 		assert.Equal(t, tt.want, got, tt.name)
 	}
 }

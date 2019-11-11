@@ -9,6 +9,7 @@
 package token
 
 import (
+	"errors"
 	"unicode"
 )
 
@@ -72,7 +73,6 @@ const (
 	AT // @
 
 	ASSIGN // =
-	ARROW  // <-
 
 	ELLIPSIS // ...
 
@@ -247,13 +247,21 @@ func init() {
 	}
 }
 
-// Lookup maps an identifier to its keyword token or IDENT (if not a keyword).
+// LookupIdent maps an identifier to its keyword token or IDENT (if not a keyword).
 //
-func Lookup(ident string) Type {
+func LookupIdent(ident string) Type {
 	if tokType, isKeyword := keywords[ident]; isKeyword {
 		return tokType
 	}
 	return IDENT
+}
+
+// LookupOperator maps a token type to a string
+func LookupOperator(tokType Type) (string, error) {
+	if tokType >= operator_beg+1 && tokType < operator_end {
+		return tokens[tokType], nil
+	}
+	return "", errors.New("token is not an operator")
 }
 
 // Predicates

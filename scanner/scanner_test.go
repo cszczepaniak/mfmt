@@ -179,30 +179,35 @@ func TestScanner_scanDot(t *testing.T) {
 		source     string
 		expTokType token.Type
 		expError   bool
+		expLexeme  string
 	}{
 		{
 			name:       "test element wise multiplication",
 			source:     ".*",
 			expTokType: token.ELEM_MUL,
 			expError:   false,
+			expLexeme:  ".*",
 		},
 		{
 			name:       "test ellipsis",
 			source:     "...",
 			expTokType: token.ELLIPSIS,
 			expError:   false,
+			expLexeme:  "...",
 		},
 		{
 			name:       "test two dots",
 			source:     "..",
 			expTokType: 0,
 			expError:   true,
+			expLexeme:  "",
 		},
 		{
 			name:       "test single dot",
 			source:     ".a",
 			expTokType: token.PERIOD,
 			expError:   false,
+			expLexeme:  ".",
 		},
 	}
 	for _, tc := range tests {
@@ -213,7 +218,7 @@ func TestScanner_scanDot(t *testing.T) {
 		} else {
 			assert.Nil(t, err, tc.name)
 			assert.Equal(t, tc.expTokType, tok.TokenType, tc.name)
-			assert.Equal(t, tc.source, tok.Lexeme, tc.name)
+			assert.Equal(t, tc.expLexeme, tok.Lexeme, tc.name)
 		}
 	}
 }

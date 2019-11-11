@@ -59,7 +59,7 @@ func (s *Scanner) scanToken() {
 	switch {
 	case isAlpha(s.c):
 		s.scanWord()
-	case isDigit(s.c) || s.c == '.':
+	case isDigit(s.c) || (s.c == '.' && isDigit(s.peek())):
 		if tok, err := s.scanNumber(); err == nil {
 			s.tokens = append(s.tokens, tok)
 		} else {
@@ -124,7 +124,11 @@ func (s *Scanner) scanToken() {
 				s.tokens = append(s.tokens, s.makeToken(token.GTR))
 			}
 		case '.':
-			s.scanDot()
+			if tok, err := s.scanDot(); err == nil {
+				s.tokens = append(s.tokens, tok)
+			} else {
+				panic(err)
+			}
 		case '"':
 			s.scanString()
 		case '\r', '\f', '\t', '\v':
@@ -146,7 +150,7 @@ func (s *Scanner) scanWord() (token.Token, error) {
 	word := string(s.source[start:s.idx])
 	if !token.IsIdentifier(word) {
 		if token.IsKeyword(word) {
-			tokType = token.Lookup(word)
+			tokType = token.LookupIdent(word)
 		} else {
 			return token.Token{}, errors.New("Invalid identifier")
 		}
@@ -207,29 +211,31 @@ func (s *Scanner) scanDot() (token.Token, error) {
 	switch s.c {
 	case '*':
 		tokType = token.ELEM_MUL
-		s.advance()
 	case '/':
 		tokType = token.ELEM_RDIV
-		s.advance()
 	case '\\':
 		tokType = token.ELEM_LDIV
-		s.advance()
 	case '^':
 		tokType = token.ELEM_PWR
-		s.advance()
 	case '\'':
 		tokType = token.TRANSP
-		s.advance()
 	case '.':
 		if s.peek() == '.' {
 			tokType = token.ELLIPSIS
-			s.advance()
 			s.advance()
 		} else {
 			return token.Token{}, errors.New("Syntax error")
 		}
 	}
-	return s.makeToken(tokType), nil
+	lex, err := token.LookupOperator(tokType)
+	if err != nil {
+		return token.Token{}, err
+	}
+	return token.Token{
+		TokenType: tokType,
+		Lexeme:    lex,
+		Line:      s.line,
+	}, nil
 }
 
 func (s *Scanner) scanString() (token.Token, error) {
