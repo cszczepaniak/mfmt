@@ -55,16 +55,20 @@ func isDigit(c rune) bool {
 	return c >= '0' && c <= '9'
 }
 
+func (s *Scanner) scanAndAppend(scanFunc func() (token.Token, error)) {
+	if tok, err := scanFunc(); err == nil {
+		s.tokens = append(s.tokens, tok)
+	} else {
+		panic(err)
+	}
+}
+
 func (s *Scanner) scanToken() {
 	switch {
 	case isAlpha(s.c):
-		s.scanWord()
+		s.scanAndAppend(s.scanWord)
 	case isDigit(s.c) || (s.c == '.' && isDigit(s.peek())):
-		if tok, err := s.scanNumber(); err == nil {
-			s.tokens = append(s.tokens, tok)
-		} else {
-			panic(err)
-		}
+		s.scanAndAppend(s.scanNumber)
 	default:
 		switch s.c {
 		// One-character tokens are up first
@@ -124,11 +128,7 @@ func (s *Scanner) scanToken() {
 				s.tokens = append(s.tokens, s.makeToken(token.GTR))
 			}
 		case '.':
-			if tok, err := s.scanDot(); err == nil {
-				s.tokens = append(s.tokens, tok)
-			} else {
-				panic(err)
-			}
+			s.scanAndAppend(s.scanDot)
 		case '"':
 			s.scanString()
 		case '\r', '\f', '\t', '\v':

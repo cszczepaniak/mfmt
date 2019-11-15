@@ -18,6 +18,11 @@ func TestScanFile(t *testing.T) {
 			sourceFile:  "testdata/simple.m",
 			expTokTypes: []token.Type{token.FLOAT, token.ELEM_MUL, token.INT, token.EOF},
 		},
+		{
+			name:        "test if statement",
+			sourceFile:  "testdata/if.m",
+			expTokTypes: []token.Type{token.IF, token.IDENT, token.EQL, token.INT, token.IDENT, token.LPAREN, token.RPAREN, token.SEMICOLON, token.END, token.EOF},
+		},
 	}
 	for _, tc := range tests {
 		s := ScanFile(tc.sourceFile)
