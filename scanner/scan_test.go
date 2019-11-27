@@ -108,6 +108,17 @@ func TestScanFile(t *testing.T) {
 				{TokenType: token.EOF, Lexeme: ``, Line: 1},
 			},
 		},
+		{
+			name:       "test string literal",
+			sourceFile: "testdata/string_lit.m",
+			expToks: []token.Token{
+				{TokenType: token.IDENT, Lexeme: `str`, Line: 1},
+				{TokenType: token.ASSIGN, Lexeme: `=`, Line: 1},
+				{TokenType: token.STRING, Lexeme: `"abc"`, Line: 1},
+				{TokenType: token.SEMICOLON, Lexeme: `;`, Line: 1},
+				{TokenType: token.EOF, Lexeme: ``, Line: 1},
+			},
+		},
 	}
 	for _, tc := range tests {
 		s := ScanFile(tc.sourceFile)

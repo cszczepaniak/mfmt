@@ -69,6 +69,8 @@ func (s *Scanner) scanToken() {
 		s.scanAndAppend(s.scanWord)
 	case isDigit(s.c) || (s.c == '.' && isDigit(s.peek())):
 		s.scanAndAppend(s.scanNumber)
+	case s.c == '"':
+		s.scanAndAppend(s.scanString)
 	default:
 		switch s.c {
 		// One-character tokens are up first
@@ -131,8 +133,6 @@ func (s *Scanner) scanToken() {
 			}
 		case '.':
 			s.scanAndAppend(s.scanDot)
-		case '"':
-			s.scanString()
 		case '\r', '\f', '\t', '\v':
 			// Skip whitespace
 		case '\n':
@@ -241,16 +241,21 @@ func (s *Scanner) scanDot() (token.Token, error) {
 }
 
 func (s *Scanner) scanString() (token.Token, error) {
+	start := s.idx
 	// Assume the current character is the opening "
 	s.advance()
-	for s.peek() != '"' {
+	for s.c != '"' {
 		s.advance()
 		if s.c == '\n' || s.isAtEnd() {
 			return token.Token{}, errors.New("Unterminated string literal")
 		}
 	}
 	s.advance()
-	return s.makeToken(token.STRING), nil
+	return token.Token{
+		TokenType: token.STRING,
+		Lexeme:    string(s.source[start:s.idx]),
+		Line:      s.line,
+	}, nil
 }
 
 func (s *Scanner) makeToken(tokenType token.Type) token.Token {
