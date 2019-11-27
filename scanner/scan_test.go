@@ -5,59 +5,116 @@ import (
 
 	"github.com/cszczepaniak/mfmt/token"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestScanFile(t *testing.T) {
 	tests := []struct {
-		name        string
-		sourceFile  string
-		expTokTypes []token.Type
+		name       string
+		sourceFile string
+		expToks    []token.Token
 	}{
 		{
-			name:        "test simple file",
-			sourceFile:  "testdata/simple.m",
-			expTokTypes: []token.Type{token.FLOAT, token.ELEM_MUL, token.INT, token.EOF},
+			name:       "test simple file",
+			sourceFile: "testdata/simple.m",
+			expToks: []token.Token{
+				{TokenType: token.FLOAT, Lexeme: `.123`, Line: 1},
+				{TokenType: token.ELEM_MUL, Lexeme: `.*`, Line: 1},
+				{TokenType: token.INT, Lexeme: `123`, Line: 1},
+				{TokenType: token.EOF, Lexeme: ``, Line: 1},
+			},
 		},
 		{
 			name:       "test if statement",
 			sourceFile: "testdata/if.m",
-			expTokTypes: []token.Type{token.IF, token.IDENT, token.EQL, token.INT,
-				token.IDENT, token.LPAREN, token.RPAREN, token.SEMICOLON, token.END,
-				token.EOF},
+			expToks: []token.Token{
+				{TokenType: token.IF, Lexeme: `if`, Line: 1},
+				{TokenType: token.IDENT, Lexeme: `myVar`, Line: 1},
+				{TokenType: token.EQL, Lexeme: `==`, Line: 1},
+				{TokenType: token.INT, Lexeme: `5`, Line: 1},
+				{TokenType: token.IDENT, Lexeme: `doSomething`, Line: 2},
+				{TokenType: token.LPAREN, Lexeme: `(`, Line: 2},
+				{TokenType: token.RPAREN, Lexeme: `)`, Line: 2},
+				{TokenType: token.SEMICOLON, Lexeme: `;`, Line: 2},
+				{TokenType: token.END, Lexeme: `end`, Line: 3},
+				{TokenType: token.EOF, Lexeme: ``, Line: 3},
+			},
 		},
 		{
 			name:       "test ellipsis",
 			sourceFile: "testdata/ellipsis.m",
-			expTokTypes: []token.Type{token.IDENT, token.ASSIGN, token.LBRACK,
-				token.INT, token.COMMA, token.INT, token.COMMA, token.ELLIPSIS,
-				token.INT, token.COMMA, token.INT, token.RBRACK, token.SEMICOLON,
-				token.EOF},
+			expToks: []token.Token{
+				{TokenType: token.IDENT, Lexeme: `A`, Line: 1},
+				{TokenType: token.ASSIGN, Lexeme: `=`, Line: 1},
+				{TokenType: token.LBRACK, Lexeme: `[`, Line: 1},
+				{TokenType: token.INT, Lexeme: `1`, Line: 1},
+				{TokenType: token.COMMA, Lexeme: `,`, Line: 1},
+				{TokenType: token.INT, Lexeme: `2`, Line: 1},
+				{TokenType: token.COMMA, Lexeme: `,`, Line: 1},
+				{TokenType: token.ELLIPSIS, Lexeme: `...`, Line: 1},
+				{TokenType: token.INT, Lexeme: `3`, Line: 2},
+				{TokenType: token.COMMA, Lexeme: `,`, Line: 2},
+				{TokenType: token.INT, Lexeme: `4`, Line: 2},
+				{TokenType: token.RBRACK, Lexeme: `]`, Line: 2},
+				{TokenType: token.SEMICOLON, Lexeme: `;`, Line: 2},
+				{TokenType: token.EOF, Lexeme: ``, Line: 2},
+			},
 		},
 		{
 			name:       "test classdef",
 			sourceFile: "testdata/classdef.m",
-			expTokTypes: []token.Type{token.CLASSDEF, token.IDENT, token.PROPERTIES,
-				token.IDENT, token.IDENT, token.END, token.METHODS, token.FUNCTION,
-				token.IDENT, token.ASSIGN, token.IDENT, token.LPAREN, token.RPAREN,
-				token.END, token.END, token.END, token.EOF},
+			expToks: []token.Token{
+				{TokenType: token.CLASSDEF, Lexeme: `classdef`, Line: 1},
+				{TokenType: token.IDENT, Lexeme: `MyClass`, Line: 1},
+				{TokenType: token.PROPERTIES, Lexeme: `properties`, Line: 2},
+				{TokenType: token.IDENT, Lexeme: `Abc`, Line: 3},
+				{TokenType: token.IDENT, Lexeme: `Def`, Line: 4},
+				{TokenType: token.END, Lexeme: `end`, Line: 5},
+				{TokenType: token.METHODS, Lexeme: `methods`, Line: 6},
+				{TokenType: token.FUNCTION, Lexeme: `function`, Line: 7},
+				{TokenType: token.IDENT, Lexeme: `obj`, Line: 7},
+				{TokenType: token.ASSIGN, Lexeme: `=`, Line: 7},
+				{TokenType: token.IDENT, Lexeme: `MyClass`, Line: 7},
+				{TokenType: token.LPAREN, Lexeme: `(`, Line: 7},
+				{TokenType: token.RPAREN, Lexeme: `)`, Line: 7},
+				{TokenType: token.END, Lexeme: `end`, Line: 8},
+				{TokenType: token.END, Lexeme: `end`, Line: 9},
+				{TokenType: token.END, Lexeme: `end`, Line: 10},
+				{TokenType: token.EOF, Lexeme: ``, Line: 10},
+			},
 		},
 		{
 			name:       "test function handle",
 			sourceFile: "testdata/fcn_hndl.m",
-			expTokTypes: []token.Type{token.IDENT, token.ASSIGN, token.AT,
-				token.LPAREN, token.IDENT, token.COMMA, token.IDENT, token.COMMA,
-				token.IDENT, token.RPAREN, token.LPAREN, token.IDENT, token.ADD,
-				token.IDENT, token.ADD, token.IDENT, token.RPAREN, token.SEMICOLON,
-				token.EOF},
+			expToks: []token.Token{
+				{TokenType: token.IDENT, Lexeme: `fcn`, Line: 1},
+				{TokenType: token.ASSIGN, Lexeme: `=`, Line: 1},
+				{TokenType: token.AT, Lexeme: `@`, Line: 1},
+				{TokenType: token.LPAREN, Lexeme: `(`, Line: 1},
+				{TokenType: token.IDENT, Lexeme: `x`, Line: 1},
+				{TokenType: token.COMMA, Lexeme: `,`, Line: 1},
+				{TokenType: token.IDENT, Lexeme: `y`, Line: 1},
+				{TokenType: token.COMMA, Lexeme: `,`, Line: 1},
+				{TokenType: token.IDENT, Lexeme: `z`, Line: 1},
+				{TokenType: token.RPAREN, Lexeme: `)`, Line: 1},
+				{TokenType: token.LPAREN, Lexeme: `(`, Line: 1},
+				{TokenType: token.IDENT, Lexeme: `x`, Line: 1},
+				{TokenType: token.ADD, Lexeme: `+`, Line: 1},
+				{TokenType: token.IDENT, Lexeme: `y`, Line: 1},
+				{TokenType: token.ADD, Lexeme: `+`, Line: 1},
+				{TokenType: token.IDENT, Lexeme: `z`, Line: 1},
+				{TokenType: token.RPAREN, Lexeme: `)`, Line: 1},
+				{TokenType: token.SEMICOLON, Lexeme: `;`, Line: 1},
+				{TokenType: token.EOF, Lexeme: ``, Line: 1},
+			},
 		},
 	}
 	for _, tc := range tests {
 		s := ScanFile(tc.sourceFile)
-		actTokTypes := make([]token.Type, 0)
-		for _, t := range s.tokens {
-			actTokTypes = append(actTokTypes, t.TokenType)
+		require.Len(t, s.tokens, len(tc.expToks), tc.name)
+		for i := range tc.expToks {
+			assert.Equal(t, tc.expToks[i], s.tokens[i], tc.name)
 		}
-		assert.Equal(t, tc.expTokTypes, actTokTypes, tc.name)
 	}
 }
 
