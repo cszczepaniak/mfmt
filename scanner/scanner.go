@@ -262,7 +262,7 @@ func (s *Scanner) makeToken(tokenType token.Type) token.Token {
 
 // isAtEnd checks if current is pointing at the end of the file
 func (s *Scanner) isAtEnd() bool {
-	return s.readIdx == len(s.source)
+	return s.idx == len(s.source)
 }
 
 // peek looks at the next character without advancing
