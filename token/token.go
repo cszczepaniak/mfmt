@@ -103,9 +103,11 @@ const (
 	FUNCTION
 	GLOBAL
 	IF
+	METHODS
 	OTHERWISE
 	PARFOR
 	PERSISTENT
+	PROPERTIES
 	RETURN
 	SPMD
 	SWITCH
@@ -183,9 +185,11 @@ var tokens = [...]string{
 	FUNCTION:   "function",
 	GLOBAL:     "global",
 	IF:         "if",
+	METHODS:    "methods",
 	OTHERWISE:  "otherwise",
 	PARFOR:     "parfor",
 	PERSISTENT: "persistent",
+	PROPERTIES: "properties",
 	RETURN:     "return",
 	SPMD:       "spmd",
 	SWITCH:     "switch",

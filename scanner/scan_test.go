@@ -19,14 +19,27 @@ func TestScanFile(t *testing.T) {
 			expTokTypes: []token.Type{token.FLOAT, token.ELEM_MUL, token.INT, token.EOF},
 		},
 		{
-			name:        "test if statement",
-			sourceFile:  "testdata/if.m",
-			expTokTypes: []token.Type{token.IF, token.IDENT, token.EQL, token.INT, token.IDENT, token.LPAREN, token.RPAREN, token.SEMICOLON, token.END, token.EOF},
+			name:       "test if statement",
+			sourceFile: "testdata/if.m",
+			expTokTypes: []token.Type{token.IF, token.IDENT, token.EQL, token.INT,
+				token.IDENT, token.LPAREN, token.RPAREN, token.SEMICOLON, token.END,
+				token.EOF},
 		},
 		{
-			name:        "test ellipsis",
-			sourceFile:  "testdata/ellipsis.m",
-			expTokTypes: []token.Type{token.IDENT, token.ASSIGN, token.LBRACK, token.INT, token.COMMA, token.INT, token.COMMA, token.ELLIPSIS, token.INT, token.COMMA, token.INT, token.RBRACK, token.SEMICOLON, token.EOF},
+			name:       "test ellipsis",
+			sourceFile: "testdata/ellipsis.m",
+			expTokTypes: []token.Type{token.IDENT, token.ASSIGN, token.LBRACK,
+				token.INT, token.COMMA, token.INT, token.COMMA, token.ELLIPSIS,
+				token.INT, token.COMMA, token.INT, token.RBRACK, token.SEMICOLON,
+				token.EOF},
+		},
+		{
+			name:       "test classdef",
+			sourceFile: "testdata/classdef.m",
+			expTokTypes: []token.Type{token.CLASSDEF, token.IDENT, token.PROPERTIES,
+				token.IDENT, token.IDENT, token.END, token.METHODS, token.FUNCTION,
+				token.IDENT, token.ASSIGN, token.IDENT, token.LPAREN, token.RPAREN,
+				token.END, token.END, token.END, token.EOF},
 		},
 	}
 	for _, tc := range tests {
