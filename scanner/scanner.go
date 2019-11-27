@@ -254,12 +254,20 @@ func (s *Scanner) scanString() (token.Token, error) {
 }
 
 func (s *Scanner) makeToken(tokenType token.Type) token.Token {
-	str := s.source[s.idx : s.readIdx-1]
-	return token.Token{
+	tok := token.Token{
 		TokenType: tokenType,
-		Lexeme:    string(str),
 		Line:      s.line,
 	}
+	if tok.IsOperator() {
+		lex, err := token.LookupOperator(tok.TokenType)
+		if err != nil {
+			panic(err)
+		}
+		tok.Lexeme = lex
+	} else {
+		tok.Lexeme = string(s.source[s.idx : s.readIdx-1])
+	}
+	return tok
 }
 
 // isAtEnd checks if current is pointing at the end of the file
