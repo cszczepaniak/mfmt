@@ -60,3 +60,45 @@ func TestScanFile(t *testing.T) {
 		assert.Equal(t, tc.expTokTypes, actTokTypes, tc.name)
 	}
 }
+
+func TestLineNumbers(t *testing.T) {
+	tests := []struct {
+		name       string
+		sourceFile string
+		expLines   []int
+	}{
+		{
+			name:       "test simple file",
+			sourceFile: "testdata/simple.m",
+			expLines:   []int{1, 1, 1, 1},
+		},
+		{
+			name:       "test if statement",
+			sourceFile: "testdata/if.m",
+			expLines:   []int{1, 1, 1, 1, 2, 2, 2, 2, 3, 3},
+		},
+		{
+			name:       "test ellipsis",
+			sourceFile: "testdata/ellipsis.m",
+			expLines:   []int{1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2},
+		},
+		{
+			name:       "test classdef",
+			sourceFile: "testdata/classdef.m",
+			expLines:   []int{1, 1, 2, 3, 4, 5, 6, 7, 7, 7, 7, 7, 7, 8, 9, 10, 10},
+		},
+		{
+			name:       "test function handle",
+			sourceFile: "testdata/fcn_hndl.m",
+			expLines:   []int{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+		},
+	}
+	for _, tc := range tests {
+		s := ScanFile(tc.sourceFile)
+		actLines := make([]int, 0)
+		for _, t := range s.tokens {
+			actLines = append(actLines, t.Line)
+		}
+		assert.Equal(t, tc.expLines, actLines, tc.name)
+	}
+}
