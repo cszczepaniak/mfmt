@@ -98,6 +98,8 @@ func (s *Scanner) scanToken() {
 			s.tokens = append(s.tokens, s.makeToken(token.COMMA))
 		case '\'':
 			s.tokens = append(s.tokens, s.makeToken(token.COMMA))
+		case '@':
+			s.tokens = append(s.tokens, s.makeToken(token.AT))
 			// Next handle two-character operators
 		case '~':
 			if s.peek() == '=' {

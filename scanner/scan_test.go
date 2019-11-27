@@ -41,6 +41,15 @@ func TestScanFile(t *testing.T) {
 				token.IDENT, token.ASSIGN, token.IDENT, token.LPAREN, token.RPAREN,
 				token.END, token.END, token.END, token.EOF},
 		},
+		{
+			name:       "test function handle",
+			sourceFile: "testdata/fcn_hndl.m",
+			expTokTypes: []token.Type{token.IDENT, token.ASSIGN, token.AT,
+				token.LPAREN, token.IDENT, token.COMMA, token.IDENT, token.COMMA,
+				token.IDENT, token.RPAREN, token.LPAREN, token.IDENT, token.ADD,
+				token.IDENT, token.ADD, token.IDENT, token.RPAREN, token.SEMICOLON,
+				token.EOF},
+		},
 	}
 	for _, tc := range tests {
 		s := ScanFile(tc.sourceFile)
